@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+############################################################
+# wishlist wishlist_id
+# Mike Schilli <mschilli1@aol.com>, 2003
+############################################################
+
+use strict;
+use warnings;
+
+use Net::Amazon;
+use Net::Amazon::Request::Wishlist;
+
+die "usage: $0 wishlist_id\n" .
+    "(use 3W25UPFJVC46G as an example)\n" unless $ARGV[0];
+
+my $ua = Net::Amazon->new(
+    token       => 'YOUR_AMZN_TOKEN',
+);
+
+my $req = Net::Amazon::Request::Wishlist->new(
+    id  => $ARGV[0]
+);
+
+   # Response is of type Net::Amazon::ASIN::Response
+my $resp = $ua->request($req);
+
+print $resp->as_string, "\n";

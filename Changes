@@ -1,0 +1,12 @@
+Revision history for Perl extension Net::Amazon:
+
+TODO:
+   * tests with lite/heavy
+   * raw xml access
+   * heavy accessors
+
+0.02
+   (ms) documentation updated
+
+0.01
+   (ms) where it all started

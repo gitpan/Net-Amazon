@@ -1,0 +1,12 @@
+eg/asin_fetch
+eg/asin_img
+eg/cheapo
+eg/keyword
+blib
+^Makefile$
+^Makefile.old$
+CVS
+.cvsignore
+docs
+MANIFEST.bak
+adm/release
