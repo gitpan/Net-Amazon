@@ -1,4 +1,4 @@
-######################################################################
+#####################################################################
 package Net::Amazon;
 ######################################################################
 # Mike Schilli <m@perlmeister.com>, 2003
@@ -8,8 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.10';
-our $AMZN_XML_URL     = "http://xml.amazon.com/onca/xml2";
+our $VERSION          = '0.11';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -24,6 +23,7 @@ use Net::Amazon::Request::Artist;
 use Net::Amazon::Request::Keyword;
 use Net::Amazon::Request::Wishlist;
 use Net::Amazon::Request::UPC;
+use Net::Amazon::Request::Similar;
 
 ##################################################
 sub new {
@@ -67,12 +67,37 @@ sub search {
         $req = Net::Amazon::Request::UPC->new(%params);
     } elsif(exists $params{keyword}) {
         $req = Net::Amazon::Request::Keyword->new(%params);
+    } elsif(exists $params{similar}) {
+        $req = Net::Amazon::Request::Similar->new(asin => $params{similar},
+                                                  %params);
     } else {
         warn "No Net::Amazon::Request type could be determined";
         return;
     }
 
     return $self->request($req);
+}
+
+##################################################
+sub intl_url {
+##################################################
+    my($self, $url) = @_;
+
+    # Every time Amazon is adding a new country to the web service,
+    # they're rolling a dice on what the new URL is going to be.
+    # This method will try to keep up with their crazy mappings.
+
+    if(! exists $self->{locale}) {
+        return $url;
+    }
+
+    if($self->{locale} eq "uk" or
+       $self->{locale} eq "de") {
+        $url =~ s/xml/xml-eu/;
+        return $url;
+    }
+        
+    return $url;
 }
 
 ##################################################
@@ -89,7 +114,7 @@ sub request {
 
     my $res  = $resp_class->new();
 
-    my $url  = URI->new($AMZN_XML_URL);
+    my $url  = URI->new($self->intl_url($request->amzn_xml_url()));
     my $page = 0;
     my $ref;
 
@@ -314,7 +339,8 @@ Net::Amazon - Framework for accessing amazon.com via SOAP and XML/HTTP
 
   my $ua = Net::Amazon->new(token => 'YOUR_AMZN_TOKEN');
 
-  my $resp = $ua->search(asin => '0201360683');
+    # Get a request object
+  my $req = $ua->search(asin => '0201360683');
 
     # Response is of type Net::Amazon::Response::ASIN
   my $resp = $ua->request($req);
@@ -378,6 +404,11 @@ Can return many results.
 
 Music search by UPC (product barcode), mandatory parameter C<upc>.
 C<mode> has to be set to C<music>. Returns at most one result.
+
+=item C<< $ua->search(similar => "0201360683") >>
+
+Search for all items similar to the one represented by the ASIN provided.
+Can return many results.
 
 =back
 
@@ -507,14 +538,16 @@ corresponding C<Net::Amazon::Response::*> type.
 
 =head2 Accessing foreign Amazon Catalogs
 
-As of this writing (06/2003), Amazon also offers its web service for
-its UK catalog. Just pass
+As of this writing (07/2003), Amazon also offers its web service for
+the UK, Germany, and Japan. Just pass in
 
     locale => 'uk'
+    locale => 'de'
+    locale => 'jp'
 
-to C<Net::Amazon>'s constructor C<new()> and instead of returning
-results sent by the US mothership, it will query the UK catalog
-and show prices in (gack!) Pounds.
+respectively to C<Net::Amazon>'s constructor C<new()> and instead of returning
+results sent by the US mothership, it will query the particular country's
+catalog and show prices in (gack!) local currencies.
 
 =head2 EXAMPLE
 

@@ -1,5 +1,5 @@
 ######################################################################
-    Net::Amazon 0.10
+    Net::Amazon 0.11
 ######################################################################
 
 NAME
@@ -10,7 +10,8 @@ SYNOPSIS
 
       my $ua = Net::Amazon->new(token => 'YOUR_AMZN_TOKEN');
 
-      my $resp = $ua->search(asin => '0201360683');
+        # Get a request object
+      my $req = $ua->search(asin => '0201360683');
 
         # Response is of type Net::Amazon::Response::ASIN
       my $resp = $ua->request($req);
@@ -65,6 +66,10 @@ DESCRIPTION
     "$ua->search(upc => "075596278324", mode => "music")"
         Music search by UPC (product barcode), mandatory parameter "upc".
         "mode" has to be set to "music". Returns at most one result.
+
+    "$ua->search(similar => "0201360683")"
+        Search for all items similar to the one represented by the ASIN
+        provided. Can return many results.
 
     The user agent's "search" method returns a response object, which can be
     checked for success or failure:
@@ -162,14 +167,17 @@ DESCRIPTION
         corresponding "Net::Amazon::Response::*" type.
 
   Accessing foreign Amazon Catalogs
-    As of this writing (06/2003), Amazon also offers its web service for its
-    UK catalog. Just pass
+    As of this writing (07/2003), Amazon also offers its web service for the
+    UK, Germany, and Japan. Just pass in
 
         locale => 'uk'
+        locale => 'de'
+        locale => 'jp'
 
-    to "Net::Amazon"'s constructor "new()" and instead of returning results
-    sent by the US mothership, it will query the UK catalog and show prices
-    in (gack!) Pounds.
+    respectively to "Net::Amazon"'s constructor "new()" and instead of
+    returning results sent by the US mothership, it will query the
+    particular country's catalog and show prices in (gack!) local
+    currencies.
 
   EXAMPLE
     Here's a full-fledged example doing a artist search:
