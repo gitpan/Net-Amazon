@@ -1,5 +1,29 @@
 Revision history for Perl extension Net::Amazon:
 
+0.28 (08/04/2004)
+   (ms) ASIN search can now process several asin numbers with one request.
+        Dan Kreft <dan@kreft.net> cleaned up the implementation of 
+        Request.pm, ASIN.pm and a bunch of other files.
+   (ms) Tatsuhiko Miyagawa <miyagawa@livedoor.jp> provided a patch for
+        load errors on search(blended => ...), a fix for a bug with
+        single/multiple ProductLine(s), and a suggestion for using
+        ForceArray which XML::Simple. Added test cases for this patch.
+   (ms) Added xml_parse() method to Net::Amazon::Response which Net::Amazon
+        now calls to parse the returned XML. This enables the response
+        class (which can override it) to creatively interpret the 
+        response XML to form the response data structure.
+   (ms) Added strict warnings to each and every module
+   (ms) Added dump_responses() for easier response canning.
+
+0.27 (07/27/2004)
+   (ms) Richard Giliam <nirosys@nirostasis.net> added the isbn()
+        method to the Book.pm property.
+   (ms) Andy Grundman <andy@hybridized.org> provided a patch to 
+        enforce Amazon's no-more-than-1-request-per-second rule. 
+        A new parameter 'strict' has been added to the Net::Amazon 
+        constructor, which will limit the number of requests if 
+        set to 1. Defaults to 1.
+
 0.26 (07/07/2004)
    (ms) Added ProductDescription to Properties.pm
    (ms) Applied patch by Robert Rothenberg <wlkngowl@i-2000.com> for 

@@ -1,23 +1,72 @@
 ######################################################################
 package Net::Amazon::Request::ASIN;
 ######################################################################
+use warnings;
+use strict;
 use base qw(Net::Amazon::Request);
+
+# These values are defined in the AWS SDK
+# (http://amazon.com/webservices) under
+# "Product and Catalog Data" / "ASIN and ISBN Searches"
+use constant MAX_ASINS_PER_TYPE => {
+    heavy => 10,
+    lite  => 30,
+};
 
 ##################################################
 sub new {
 ##################################################
     my($class, %options) = @_;
 
-    if(exists $options{asin}) {
-        $options{AsinSearch} = $options{asin};
-        delete $options{asin};
-    } else {
-        die "Mandatory parameter 'asin' not defined";
-    }
+    $class->_assert_options_defined(\%options, 'asin');
+
+    $class->_convert_option(\%options,
+                            'asin',
+                            'AsinSearch',
+                            \&_process_asin_option);
 
     my $self = $class->SUPER::new(%options);
 
     bless $self, $class;   # reconsecrate
+}
+
+##
+## PRIVATE FUNCTIONS
+##
+
+# _process_asin_option( OPTIONS, KEY )
+#
+# Takes a reference to a hash of OPTIONS and checks the value keyed by
+# KEY to make sure it looks legitimate.  If the value associated with
+# KEY is an array, we check to make sure that we're not asking for
+# too many asins at once.
+#
+# Returns true if all goes well. If any problems are encountered,
+# die() will be called.
+#
+sub _process_asin_option {
+    my ($options, $key) = @_;
+
+    # If the asins are supplied in the form of an array, we have to
+    # make sure that the caller isn't trying to ask for too many at a
+    # time. If we don't make this test, those excessive asins will be
+    # silently ignored by the AWS servers...resulting in potentially
+    # confusing results for the user.
+    if ( ref $options->{$key} eq 'ARRAY' ) {
+        my $type      = $options->{'type'} || __PACKAGE__->SUPER::DEFAULT_TYPE;
+        my $max_asins = MAX_ASINS_PER_TYPE->{$type};
+
+        # Dying is the right thing to do here because this is
+        # indicative of a programming error.
+        die "Only $max_asins may be requested at a time using type '$type'"
+            if ( @{$options->{$key}} > $max_asins );
+
+        $options->{$key} = join ',', @{$options->{$key}};
+    } elsif ( ref $options->{$key} ) {
+        die "The 'asin' parameter must either be a scalar or an array";
+    }
+
+    return 1;
 }
 
 1;
@@ -62,6 +111,13 @@ single C<Net::Amazon::Property::*> object.
 
 Constructs a new C<Net::Amazon::Request::ASIN> object, used to query
 the Amazon web service for an item with the specified ASIN number.
+
+C<$asin> can also be a reference to an array of ASINs, like in
+
+    $ua->search(asin => ["0201360683", "0596005083"]) 
+
+in which case a search for multiple ASINs is performed, returning a list of 
+results.
 
 =back
 

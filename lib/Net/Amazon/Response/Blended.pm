@@ -1,9 +1,14 @@
 ######################################################################
 package Net::Amazon::Response::Blended;
 ######################################################################
+use warnings;
+use strict;
 use base qw(Net::Amazon::Response);
 
 use Net::Amazon::Property;
+use XML::Simple;
+
+our @FORCE_ARRAY_FIELDS = qw(ProductLine);
 
 ##################################################
 sub new {
@@ -54,6 +59,15 @@ sub xmlref_add {
     }
 
     return $nof_items_added;
+}
+
+##################################################
+sub xml_parse {
+##################################################
+    my($self, $xml) = @_;
+
+    my $xs = XML::Simple->new();
+    return $xs->XMLin($xml, ForceArray => [ @FORCE_ARRAY_FIELDS ]);
 }
 
 1;

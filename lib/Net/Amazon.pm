@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.26';
+our $VERSION          = '0.28';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -16,17 +16,25 @@ use HTTP::Request::Common;
 use XML::Simple;
 use Data::Dumper;
 use URI;
-use Log::Log4perl qw(:easy);
+use Log::Log4perl qw(:easy get_logger);
+use Time::HiRes qw(usleep gettimeofday tv_interval);
 
-use Net::Amazon::Request::ASIN;
-use Net::Amazon::Request::Artist;
-use Net::Amazon::Request::BrowseNode;
-use Net::Amazon::Request::Keyword;
-use Net::Amazon::Request::Wishlist;
-use Net::Amazon::Request::UPC;
-use Net::Amazon::Request::Similar;
-use Net::Amazon::Request::Power;
-use Net::Amazon::Request::TextStream;
+# Each key represents a search() type, and each value indicates which
+# Net::Amazon::Request:: class to use to handle it.
+use constant SEARCH_TYPE_CLASS_MAP => {
+    artist       => 'Artist',
+    asin         => 'ASIN',
+    blended      => 'Blended',
+    browsenode   => 'BrowseNode',
+    keyword      => 'Keyword',
+    manufacturer => 'Manufacturer',
+    power        => 'Power',
+    similar      => 'Similar',
+    textstream   => 'TextStream',
+    upc          => 'UPC',
+    wishlist     => 'Wishlist',
+};
+
 
 ##################################################
 sub new {
@@ -42,8 +50,11 @@ sub new {
     }
 
     my $self = {
-        max_pages => 5,
-        ua        => LWP::UserAgent->new(),
+        strict         => 1,
+        response_dump  => 0,
+        rate_limit     => 1.0,  # 1 req/sec
+        max_pages      => 5,
+        ua             => LWP::UserAgent->new(),
         %options,
                };
 
@@ -57,40 +68,21 @@ sub search {
 ##################################################
     my($self, %params) = @_;
 
-    my $req;
-
-    if(0) {
-    } elsif(exists $params{asin}) {
-        $req = Net::Amazon::Request::ASIN->new(%params);
-    } elsif(exists $params{artist}) {
-        $req = Net::Amazon::Request::Artist->new(%params);
-    } elsif(exists $params{blended}) {
-        $req = Net::Amazon::Request::Blended->new(%params);
-    } elsif(exists $params{wishlist}) {
-        $req = Net::Amazon::Request::Wishlist->new(
-                                   id => $params{wishlist}, %params);
-    } elsif(exists $params{upc}) {
-        $req = Net::Amazon::Request::UPC->new(%params);
-    } elsif(exists $params{keyword}) {
-        $req = Net::Amazon::Request::Keyword->new(%params);
-    } elsif(exists $params{similar}) {
-        $req = Net::Amazon::Request::Similar->new(asin => $params{similar},
-                                                  %params);
-    } elsif(exists $params{power}) {
-        $req = Net::Amazon::Request::Power->new(%params);
-    } elsif(exists $params{browsenode}) {
-        $req = Net::Amazon::Request::BrowseNode->new(%params);
-    } elsif(exists $params{manufacturer}) {
-        $req = Net::Amazon::Request::Manufacturer->new(%params);
-    } elsif(exists $params{textstream}) {
-        $req = Net::Amazon::Request::TextStream->new(%params);
-
-    } else {
-        warn "No Net::Amazon::Request type could be determined";
-        return;
+    foreach my $key ( keys %params ) {
+        next unless ( my $class = SEARCH_TYPE_CLASS_MAP->{$key} );
+        
+        return $self->_make_request($class, \%params);
     }
 
-    return $self->request($req);
+    # FIX?
+    # This seems like it really should be a die() instead...this is
+    # indicative of a programming problem. Generally speaking, it's
+    # best to issue warnings from a module--you can't be sure that the
+    # client has a stderr to begin with, or that he wants errors
+    # spewed to it.
+    warn "No Net::Amazon::Request type could be determined";
+
+    return undef;
 }
 
 ##################################################
@@ -158,8 +150,8 @@ sub request {
 
         DEBUG(sub { "Received [ " . $xml . "]" });
 
-        my $xs = XML::Simple->new();
-        $ref = $xs->XMLin($xml);
+            # Let the response class parse the XML
+        $ref = $res->xml_parse($xml);
 
         # DEBUG(sub { Data::Dumper::Dumper($ref) });
 
@@ -266,19 +258,46 @@ sub fetch_url {
     my $resp;
 
     {
+        # wait up to a second before the next request so
+        # as to not violate Amazon's 1 query per second
+        # rule (or the configured rate_limit).
+        $self->pause() if $self->{strict};
+
         $resp = $ua->request(GET $url);
 
+        $self->reset_timer() if $self->{strict};
+
         if($resp->is_error) {
-            $res->status("");
-            $res->messages( [ $resp->message ] );
-            return undef;
+            # retry on 503 Service Unavailable errors
+            if ($resp->code == 503) {
+                if ($max_retries-- >= 0) {
+                    INFO("Temporary Amazon error 503, retrying");
+                    redo;
+                } else {
+                    INFO("Out of retries, giving up");
+                    $res->status("");
+                    $res->messages( [ "Too many temporary Amazon errors" ] );
+                    return undef;
+                }
+            } else {
+                $res->status("");
+                $res->messages( [ $resp->message ] );
+                return undef;
+            }
+        }
+
+        if($self->{response_dump}) {
+            my $dumpfile = "response-$self->{response_dump}.txt";
+            open FILE, ">$dumpfile" or die "Cannot open $dumpfile";
+            print FILE $resp->content();
+            close FILE;
+            $self->{response_dump}++;
         }
 
         if($resp->content =~ /<ErrorMsg>/ &&
            $resp->content =~ /Please retry/i) {
             if($max_retries-- >= 0) {
                 INFO("Temporary Amazon error, retrying");
-                sleep(1);
                 redo;
             } else {
                 INFO("Out of retries, giving up");
@@ -418,6 +437,62 @@ sub help_xml_simple_choose_a_parser {
     }
 }
 
+##################################################
+# This timer makes sure we don't query Amazon more
+# than once a second.
+##################################################
+sub reset_timer {
+##################################################
+
+    my $self = shift;
+    $self->{t0} = [gettimeofday];
+}
+
+##################################################
+# Pause for up to a second if necessary.
+##################################################
+sub pause {
+##################################################
+
+    my $self = shift;
+    return unless ($self->{t0});
+
+    my $t1 = [gettimeofday];
+    my $dur = (1.0/$self->{rate_limit} - 
+               tv_interval($self->{t0}, $t1)) * 1000000;
+    if($dur > 0) {
+            # Use a pseudo subclass for the logger, since the app
+            # might not want to log that as 'ERROR'. Log4perl's
+            # inheritance mechanism makes sure it does the right
+            # thing for the current class.
+        my $logger = get_logger(__PACKAGE__ . "::RateLimit");
+        $logger->error("Ratelimiting: Sleeping $dur microseconds"); 
+        usleep($dur);
+    }
+}
+
+##
+## 'PRIVATE' METHODS
+##
+
+# $self->_make_request( TYPE, PARAMS )
+#
+# Takes a TYPE that corresponds to a Net::Amazon::Request
+# class, require()s that class, instantiates it, and returns
+# the result of that instance's request() method.
+#
+sub _make_request {
+    my ($self, $type, $params) = @_;
+
+    my $class = "Net::Amazon::Request::$type";
+
+    eval "require $class";
+
+    my $req = $class->new(%{$params});
+    
+    return $self->request($req);
+}
+
 1;
 
 __END__
@@ -461,7 +536,9 @@ like
 which you pass your personal amazon developer's token (can be obtained
 from L<http://amazon.com/soap>) and (optionally) the maximum number of 
 result pages the agent is going to request from Amazon in case all
-results don't fit on a single page (typically holding 20 items).
+results don't fit on a single page (typically holding 20 items).  Note that
+each new page requires a minimum delay of 1 second to comply with Amazon's
+one-query-per-second policy.
 
 According to the different search methods on Amazon, there's a bunch
 of different request types in C<Net::Amazon>. The user agent's 
@@ -473,7 +550,13 @@ depending on which parameters you pass to it:
 =item C<< $ua->search(asin => "0201360683") >>
 
 The C<asin> parameter has Net::Amazon search for an item with the 
-specified ASIN. Returns at most one result.
+specified ASIN. If the specified value is an arrayref instead of a single
+scalar, like in
+
+    $ua->search(asin => ["0201360683", "0596005083"]) 
+
+then a search for multiple ASINs is performed, returning a list of 
+results.
 
 =item C<< $ua->search(artist => "Rolling Stones") >>
 
@@ -677,15 +760,32 @@ Additional optional parameters:
 
 =item C<< max_pages => $max_pages >>
 
-sets how many 
+Sets how many 
 result pages the module is supposed to fetch back from Amazon, which
-only sends back 10 results per page. 
+only sends back 10 results per page.  
+Since each page requires a new query to Amazon, at most one query 
+per second will be made in C<strict> mode to comply with Amazon's terms 
+of service. This will impact performance if you perform a search 
+returning many pages of results.
 
 =item C<< affiliate_id => $affiliate_id >>
 
 your Amazon affiliate ID, if you have one. It defaults to 
 C<webservices-20> which is currently (as of 06/2003) 
 required by Amazon.
+
+=item C<< strict => 1 >>
+
+Makes sure that C<Net::Amazon> complies with Amazon's terms of service
+by limiting the number of outgoing requests to 1 per second. Defaults
+to C<1>, enabling rate limiting as defined via C<rate_limit>.
+
+=item C<< rate_limit => $reqs_per_sec >>
+
+Sets the rate limit to C<$reqs_per_sec> requests per second if 
+rate limiting has been enabled with C<strict> (see above).
+Defaults to C<1>, limiting the number of outgoing requests to 
+1 per second.
 
 =back
 
@@ -1068,10 +1168,12 @@ Mike Schilli, E<lt>na@perlmeister.comE<gt> (Please contact me via the mailing li
 
 Contributors (thanks y'all!):
 
+    Andy Grundman <andy@hybridized.org>
     Barnaby Claydon <bclaydon@perseus.com>
     Batara Kesuma <bkesuma@gaijinweb.com>
     Bill Fitzpatrick
     Brian Hirt <bhirt@mobygames.com>
+    Dan Kreft <dan@kreft.net>
     Dan Sully <daniel@electricrain.com>
     Jackie Hamilton <kira@cgi101.com>
     Konstantin Gredeskoul <kig@get.topica.com>

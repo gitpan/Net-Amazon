@@ -1,6 +1,8 @@
 ######################################################################
 package Net::Amazon::Response::ASIN;
 ######################################################################
+use warnings;
+use strict;
 use base qw(Net::Amazon::Response);
 
 use Net::Amazon::Property;
@@ -20,19 +22,7 @@ sub as_string {
 ##################################################
     my($self) = @_;
 
-    my($property) = $self->properties;
-    return $property->as_string();
-}
-
-##################################################
-sub properties {
-##################################################
-    my($self) = @_;
-
-    my $item = Net::Amazon::Property::factory(
-        xmlref => $self->{xmlref}->{Details}->[0]);
-
-    return ($item);
+    return $self->SUPER::list_as_string($self->properties);
 }
 
 1;

@@ -1,9 +1,11 @@
 ######################################################################
 package Net::Amazon::Property::Book;
 ######################################################################
+use warnings;
+use strict;
 use base qw(Net::Amazon::Property);
 
-__PACKAGE__->make_accessor($_) for qw(title publisher binding);
+__PACKAGE__->make_accessor($_) for qw(title publisher binding isbn);
 
 ##################################################
 sub new {
@@ -31,6 +33,7 @@ sub init_via_xmlref {
     $self->title($xmlref->{ProductName});
     $self->publisher($xmlref->{Manufacturer});
     $self->binding($xmlref->{Media});
+    $self->isbn($xmlref->{Isbn});
 }
 
 ##################################################
@@ -116,6 +119,10 @@ Returns the book's publishing company as a string.
 =item title()
 
 Returns the book's title as a string.
+
+=item isbn()
+
+Returns the book's ISBN number.
 
 =item new(xmlref => $xmlref)
 
