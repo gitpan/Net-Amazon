@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.09';
+our $VERSION          = '0.10';
 our $AMZN_XML_URL     = "http://xml.amazon.com/onca/xml2";
 our @CANNED_RESPONSES = ();
 
@@ -42,6 +42,8 @@ sub new {
         max_pages => 5,
         %options,
                };
+
+    help_xml_simple_choose_a_parser();
 
     bless $self, $class;
 }
@@ -279,6 +281,23 @@ sub xmlref_add {
 
     #DEBUG("xmlref_add (after):", Data::Dumper::Dumper($self));
     return $nof_items_added;
+}
+
+##################################################
+sub help_xml_simple_choose_a_parser {
+##################################################
+    
+    eval "require XML::Parser";
+    unless($@) {
+        $XML::Simple::PREFERRED_PARSER = "XML::Parser";
+        return;
+    }
+
+    eval "require XML::SAX::PurePerl";
+    unless($@) {
+        $XML::Simple::PREFERRED_PARSER = "XML::SAX::PurePerl";
+        return;
+    }
 }
 
 1;
@@ -597,13 +616,25 @@ and on CPAN.
 
 =head1 SEE ALSO
 
+=head1 CONTACT
+
+The C<Net::Amazon> project's home page is hosted on 
+
+    http://net-amazon.sourceforge.net
+
+where you can find documentation, news and the latest development and
+stable releases for download. If you have questions about how to
+use C<Net::Amazon>, want to report a bug or just participate in its
+development, please send a message to the mailing 
+list amazon-net-devel@lists.sourceforge.net
+
 =head1 AUTHOR
 
-Mike Schilli, E<lt>m@perlmeister.comE<gt>
+Mike Schilli, E<lt>na@perlmeister.comE<gt> (Please contact me via the mailing list: net-amazon-devel@lists.sourceforge.net )
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2003 by Mike Schilli E<lt>m@perlmeister.comE<gt>
+Copyright 2003 by Mike Schilli E<lt>na@perlmeister.comE<gt>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
