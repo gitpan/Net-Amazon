@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.12';
+our $VERSION          = '0.14';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -132,7 +132,7 @@ sub request {
         );
 
         my $urlstr = $url->as_string;
-        my $xml = fetch_url($urlstr, $res);
+        my $xml = fetch_url($self, $urlstr, $res);
 
         if(!defined $xml) {
             return $res;
@@ -206,7 +206,7 @@ sub request {
 ##################################################
 sub fetch_url {
 ##################################################
-    my($url, $res) = @_;
+    my($self, $url, $res) = @_;
 
     my $max_retries = 2;
 
@@ -215,6 +215,16 @@ sub fetch_url {
     if(@CANNED_RESPONSES) {
         INFO("Serving canned response (testing)");
         return shift @CANNED_RESPONSES;
+    }
+
+    if(exists $self->{cache}) {
+        my $resp = $self->{cache}->get($url);
+        if(defined $resp) {
+            INFO("Serving from cache");
+            return $resp;
+        }
+
+        INFO("Cache miss");
     }
 
     my $ua = LWP::UserAgent->new();
@@ -242,6 +252,10 @@ sub fetch_url {
                 return undef;
             }
         }
+    }
+
+    if(exists $self->{cache}) {
+        $self->{cache}->set($url, $resp->content());
     }
 
     return $resp->content();
@@ -447,6 +461,12 @@ C<Net::Amazon::Property::Music> feature convenience methods like
 C<authors()> (returning the list of authors of a book) or 
 C<album()> for CDs, returning the album title.
 
+Customer reviews:
+Every property features a C<review_set()> method which returns a
+C<Net::Amazon::Attribute::ReviewSet> object, which in turn offers
+a list of C<Net::Amazon::Attribute::Review> objects. Check the respective
+man pages for details on what's available.
+
 =head2 Requests behind the scenes
 
 C<Net::Amazon>'s C<search()> method is just a convenient way to 
@@ -599,6 +619,44 @@ And here's one displaying someone's wishlist:
         print $resp->message(), "\n";
     }
 
+=head1 CACHING
+
+Responses returned by Amazon's web service can be cached locally.
+C<Net::Amazon>'s C<new> method accepts a reference to a C<Cache>
+object. C<Cache> (or one of its companions like C<Cache::Memory>,
+C<Cache::File>, etc.) can be downloaded from CPAN, please check their
+documentation for details. In fact, any other type of cache
+implementation will do as well, see the requirements below.
+
+Here's an example utilizing a file cache which causes C<Net::Amazon> to
+cache responses for 30 minutes:
+
+    use File::Cache;
+
+    my $cache = Cache::File->new( 
+        cache_root        => '/tmp/mycache',
+        default_expires   => '30 min',
+    );
+
+    my $ua = Net::Amazon->new(
+        token       => 'YOUR_AMZN_TOKEN',
+        cache       => $cache,
+    );
+
+C<Net::Amazon> uses I<positive> caching only, errors won't be cached. 
+Erroneous requests will be sent to Amazon every time. Positive cache 
+entries are keyed by the full URL used internally by requests submitted 
+to Amazon.
+
+Caching isn't limited to the C<Cache> class. Any cache object which
+adheres to the following interface can be used:
+
+        # Set a cache value
+    $cache->set($key, $value);
+
+        # Return a cached value, 'undef' if it doesn't exist
+    $cache->get($key);
+
 =head1 DEBUGGING
 
 If something's going wrong and you want more verbosity, just bump up
@@ -627,6 +685,82 @@ cases against canned data. If you want to perform the tests against
 the live Amazon servers instead, just set the environment variable
 
     NET_AMAZON_LIVE_TESTS=1
+
+=head1 WHY ISN'T THERE SUPPORT FOR METHOD XYZ?
+
+Because nobody wrote it yet. If Net::Amazon doesn't yet support a method
+advertised on Amazon's web service, you could help us out. Net::Amazon
+has been designed to be expanded over time, usually it only takes a couple
+of lines to support a new method, the rest is done via inheritance within
+Net::Amazon.
+
+Here's the basic plot:
+
+=over 4
+
+=item *
+
+Get Net::Amazon from CVS. Use
+
+    cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/Net-Amazon login
+    cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/Net-Amazon co Net-Amazon
+
+=item *
+
+Write a new Net::Amazon::Request::XYZ package, start with this template
+
+    ######################################
+    package Net::Amazon::Request::XYZ;
+    ######################################
+    use base qw(Net::Amazon::Request);
+
+    ######################################
+    sub new {
+    ######################################
+        my($class, %options) = @_;
+
+        if(!exists $options{XYZ_option}) {
+            die "Mandatory parameter 'XYZ_option' not defined";
+        }
+    
+        my $self = $class->SUPER::new(%options);
+    
+        bless $self, $class;   # reconsecrate
+    }
+
+and add documentation. Then, create a new Net::Amazon::Response::XYZ module:
+
+    ##############################
+    package Net::Amazon::Response;
+    ##############################
+    use base qw(Net::Amazon::Response);
+
+    use Net::Amazon::Property;
+
+    ##############################
+    sub new {
+    ##############################
+        my($class, %options) = @_;
+    
+        my $self = $class->SUPER::new(%options);
+    
+        bless $self, $class;   # reconsecrate
+    }
+
+and also add documentation to it. Then, add the line
+
+    use Net::Amazon::Request::XYZ;
+
+to Net/Amazon.pm.
+
+=back
+
+And that's it! Check out the different Net::Amazon::Request::*
+and Net::Amazon::Response modules in the distribution if you need to adapt
+your new module to fulfil any special needs, like a different Amazon URL
+or a different way to handle the as_string() method. Also, post
+and problems you might encounter to the mailing list, we're gonna help you
+out.
 
 =head1 INSTALLATION
 
