@@ -1,5 +1,10 @@
 Revision history for Perl extension Net::Amazon:
 
+0.20 (03/08/2004)
+   (ms) rayg <rayg@varchars.com> added textstream search and support
+        for sorting results.
+   (ms) added directors(), director() and starring() to DVD.pm
+
 0.19 (02/13/2004)
    (ms) Michael Coulter <mjc@bitz.ca> noticed that eg/review had the
         wrong path to Review.pm.
@@ -141,8 +146,3 @@ Revision history for Perl extension Net::Amazon:
 
 0.01
    (ms) where it all started
-
-TODO:
-   * tests with lite/heavy
-   * raw xml access
-   * heavy accessors
