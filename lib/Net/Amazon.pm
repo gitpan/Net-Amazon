@@ -8,10 +8,11 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION      = '0.05';
+our $VERSION      = '0.06';
 our $AMZN_XML_URL = "http://xml.amazon.com/onca/xml2";
 
-use LWP::Simple ();
+use LWP::UserAgent;
+use HTTP::Request::Common;
 use XML::Simple;
 use Data::Dumper;
 use URI;
@@ -43,6 +44,8 @@ sub request {
 ##################################################
     my($self, $request) = @_;
 
+    my $AMZN_WISHLIST_BUG_ENCOUNTERED = 0;
+
     my $resp_class = $request->response_class();
 
     eval "require $resp_class;" or 
@@ -54,7 +57,7 @@ sub request {
     my $page = 0;
     my $ref;
 
-    do {
+    {
         $page++;
 
         my %params = $request->params();
@@ -68,13 +71,9 @@ sub request {
         );
 
         my $urlstr = $url->as_string;
-        my $xml = LWP::Simple::get $urlstr;
-
-        INFO("Fetching $url");
+        my $xml = fetch_url($urlstr, $res);
 
         if(!defined $xml) {
-            $res->message("Can't get URL $urlstr");
-            $res->status("");
             return $res;
         }
 
@@ -83,28 +82,103 @@ sub request {
         my $xs = XML::Simple->new();
         $ref = $xs->XMLin($xml);
 
-        if(exists $ref->{TotalPages}) {
-            INFO("Page $page/$ref->{TotalPages}");
-        }
+        # DEBUG(sub { Data::Dumper::Dumper($ref) });
 
         if(! defined $ref) {
+            ERROR("Invalid XML");
             $res->message("Invalid XML");
             $res->status("");
             return $res;
         }
 
+        if(exists $ref->{TotalPages}) {
+            INFO("Page $page/$ref->{TotalPages}");
+        }
+
         if(exists $ref->{ErrorMsg}) {
+
+            if($AMZN_WISHLIST_BUG_ENCOUNTERED &&
+               $ref->{ErrorMsg} =~ /no exact matches/) {
+                DEBUG("End of buggy wishlist detected");
+                last;
+            }
+                
+            ERROR("Fetch Error: $ref->{ErrorMsg}");
             $res->message("$ref->{ErrorMsg}");
             $res->status("");
             return $res;
         }
-        $res->xmlref_add($ref);
-    } while(exists $ref->{TotalPages} and
-            $ref->{TotalPages} > $page and
-            $self->{max_pages} > $page);
+
+        my $new_items = $res->xmlref_add($ref);
+        DEBUG("Received valid XML ($new_items items)");
+
+        # Stop if we've fetched max_pages already
+        if($self->{max_pages} <= $page) {
+            DEBUG("Fetched max_pages ($self->{max_pages}) -- stopping");
+            last;
+        }
+
+        # Work around the Amazon bug not setting TotalPages properly
+        # for wishlists
+        if(ref($res) =~ /Wishlist/ and
+           !exists $ref->{TotalPages}  and
+           $new_items == 10
+          ) {
+            $AMZN_WISHLIST_BUG_ENCOUNTERED = 1;
+            DEBUG("Trying to fetch additional wishlist page (AMZN bug)");
+            redo;
+        }
+
+        if(exists $ref->{TotalPages} and
+           $ref->{TotalPages} > $page) {
+            DEBUG("Page $page of $ref->{TotalPages} fetched - continuing");
+            redo;
+        }
+
+        # We're gonna fall out of this loop here.
+    }
 
     $res->status(1);
     return $res;
+}
+
+##################################################
+sub fetch_url {
+##################################################
+    my($url, $res) = @_;
+
+    my $max_retries = 2;
+
+    INFO("Fetching $url");
+
+    my $ua = LWP::UserAgent->new();
+    my $resp;
+
+    {
+        $resp = $ua->request(GET $url);
+
+        if($resp->is_error) {
+            $res->status("");
+            $res->message($resp->message);
+            return undef;
+        }
+
+        if($resp->content =~ /<ErrorMsg>/ &&
+           $resp->content =~ /Please retry/i) {
+            if($max_retries-- >= 0) {
+                INFO("Temporary Amazon error, retrying");
+                sleep(1);
+                redo;
+            } else {
+                INFO("Out of retries, giving up");
+                $res->status("");
+                $res->message("Too many temporary Amazon errrors");
+                return undef;
+            }
+        }
+    }
+
+    return $resp->content();
 }
 
 ##################################################
@@ -123,7 +197,11 @@ sub make_accessor {
             if(defined \$value) {
                 \$self->{$name} = \$value;
             }
-            return (\$self->{$name});
+            if(exists \$self->{$name}) {
+                return (\$self->{$name});
+            } else {
+                return "";
+            }
         }
 EOT
     if(! defined *{"$package\::$name"}) {
@@ -143,8 +221,15 @@ sub xmlref_add {
         my $newref = $xmlref->{Details};
         $newref = [$newref] unless ref($newref) eq "ARRAY";
         push @{$self->{xmlref}->{Details}}, @{$newref};
+        return scalar @{$newref};
     } else {
         $self->xmlref($xmlref);
+        if(exists $xmlref->{Details} and
+           ref($xmlref->{Details}) eq "ARRAY") {
+            return scalar @{$xmlref->{Details}};
+        } else {
+            return 1;
+        }
     }
 }
 
@@ -261,7 +346,8 @@ C<properties()> available.
 
 C<properties()> returns one or more C<Net::Amazon::Property> objects of type
 C<Net::Amazon::Property> (or one of its subclasses like
-C<Net::Amazon::Property::Book> or C<Net::Amazon::Property::Music>), each
+C<Net::Amazon::Property::Book>, C<Net::Amazon::Property::Music>
+or Net::Amazon::Property::DVD), each
 of which features accessors named after the attributes of the product found
 in Amazon's database:
 

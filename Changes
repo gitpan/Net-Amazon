@@ -1,5 +1,33 @@
 Revision history for Perl extension Net::Amazon:
 
+0.06 (06/07/2003)
+   (ms) applied workaround for AMZN's wishlist bug: If a wishlist
+     is longer than 10 items, AMZN returns the first 10 items with
+     no indication if there's any followup pages. The workaround
+     just tries to fetch another batch in case there's exactly 10 and 
+     hides eventually encountered errors. 
+
+   Dan Sully <daniel@electricrain.com> provided a patch
+     to suppress a warning in case a music item isn't returning a 'year'
+     field
+
+   Barnaby Claydon <bclaydon@perseus.com> reported a couple of problems
+   with wishlists, they're fixed by the following patches:
+
+   (ms) Added new property Net::Amazon::Property::DVD
+
+   (ms) Changed as_string() of default Net::Amazon::Property (used if
+     we come across a 'Toy' or 'Video Game' category) to return
+     a more human-readable format.
+
+   (ms) Implemented retry strategy on Amazon's temporary errors, if we
+     encounter one, we'll sleep for 1 sec and then retry at most
+     twice.
+
+   (ms) Accessors have been changed to return an empty string if 
+     a value hasn't been specified in XML. Products without price and
+     other anomalies won't cause perl warnings anymore.
+
 0.05 (05/31/2003)
    Martha Greenberg <marthag@mit.edu> provided bug reports 
    and patches for
@@ -32,10 +60,6 @@ Revision history for Perl extension Net::Amazon:
    (ms) where it all started
 
 TODO:
-   * analyze what looks like a bug in AMZN's web service: If a wishlist
-     is longer than 10 items, it will display the first 10 only without
-     telling how long it is (usually this is in "TotalPages").
-
    * tests with lite/heavy
    * raw xml access
    * heavy accessors

@@ -12,7 +12,6 @@ sub new {
     bless $self, $class; # Bless into this class
 
     $class->SUPER::make_accessor("album");
-    $class->SUPER::make_accessor("year");
     $class->SUPER::make_accessor("label");
 
     if(exists $options{xmlref}) {
@@ -56,9 +55,6 @@ sub init_via_xmlref {
     $self->artists($xmlref->{Artists}->{Artist});
     $self->album($xmlref->{ProductName});
     $self->label($xmlref->{Manufacturer});
-
-    my ($year) = ($xmlref->{ReleaseDate} =~ /(\d{4})/);
-    $self->year($year);
 }
 
 ##################################################
@@ -119,10 +115,6 @@ Returns the music label as a string.
 
 Returns the CD's title as a string.
 
-=item year()
-
-Returns the year extracted from C<ReleaseDate()>.
-
 =item new(xmlref => $xmlref)
 
 Initializes an object by passing a hash of hashes structure containing
@@ -133,7 +125,7 @@ data.
 =back
 
 Check out L<Net::Amazon::Property> for all-purpose accessors, like
-C<OurPrice>, C<ListPrice>, etc.
+C<year>, C<OurPrice>, C<ListPrice>, etc.
 
 =head1 SEE ALSO
 

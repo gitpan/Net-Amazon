@@ -1,5 +1,5 @@
 ######################################################################
-package Net::Amazon::Property::Book;
+package Net::Amazon::Property::DVD;
 ######################################################################
 use base qw(Net::Amazon::Property);
 
@@ -11,8 +11,8 @@ sub new {
     my $self = $class->SUPER::new(%options);
     bless $self, $class; # Bless into this class
 
-    $class->make_accessor("title");
-    $class->make_accessor("publisher");
+    $class->SUPER::make_accessor("title");
+    $class->SUPER::make_accessor("studio");
 
     if(exists $options{xmlref}) {
         $self->init_via_xmlref($options{xmlref});
@@ -26,47 +26,8 @@ sub init_via_xmlref {
 ##################################################
     my($self, $xmlref) = @_;
 
-    $self->authors($xmlref->{Authors}->{Author});
     $self->title($xmlref->{ProductName});
-    $self->publisher($xmlref->{Manufacturer});
-}
-
-##################################################
-sub author {
-##################################################
-    my($self, $nameref) = @_;
-
-    # Only return the first author
-    return ($self->authors($nameref))[0];
-}
-
-##################################################
-sub authors {
-##################################################
-    my($self, $nameref) = @_;
-
-    if(defined $nameref) {
-        if(ref $nameref eq "ARRAY") {
-            $self->{authors} = $nameref;
-        } else {
-            $self->{authors} = [$nameref];
-        }
-    }
-
-       # Return a list
-    return @{$self->{authors}};
-}
-
-##################################################
-sub as_string {
-##################################################
-    my($self) = @_;
-
-    return join('/', $self->authors) . ", " .
-      '"' . $self->title . '"' . ", " .
-      $self->year . ", " .
-      $self->OurPrice . ", " .
-      $self->Asin;
+    $self->studio($xmlref->{Manufacturer});
 }
 
 1;
@@ -75,7 +36,7 @@ __END__
 
 =head1 NAME
 
-Net::Amazon::Property::Book - Class for books on amazon.com
+Net::Amazon::Property::DVD - Class for DVDs on amazon.com
 
 =head1 SYNOPSIS
 
@@ -85,35 +46,29 @@ Net::Amazon::Property::Book - Class for books on amazon.com
 
   if($resp->is_success()) {
       for my $prop ($resp->properties) {
-          print join("/", $prop->authors(), " ",
-                $prop->title(), " ",
-                $prop->publisher(), " ",
-                $prop->year(), "\n";
+          print $_->title(), " ",
+                $_->studio(), " ",
+                $_->year(), "\n";
   }
 
 =head1 DESCRIPTION
 
-C<Net::Amazon::Property::Book> is derived from 
+C<Net::Amazon::Property::DVD> is derived from 
 C<Net::Amazon::Property> and on top of the all-purpose
 methods the base class provides, it offers specialized accessors for
-book parameters.
+DVD parameters.
 
 =head2 METHODS
 
 =over 4
 
-=item authors()
-
-Returns a list of the book's authors. There's also a C<author()> method
-which just returns the I<first> author.
-
-=item publisher()
-
-Returns the book's publishing company as a string.
-
 =item title()
 
-Returns the book's title as a string.
+Returns the title of the DVD.
+
+=item studio()
+
+Returns the studio.
 
 =item new(xmlref => $xmlref)
 

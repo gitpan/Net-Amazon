@@ -3,6 +3,7 @@ package Net::Amazon::Property;
 ######################################################################
 use base qw(Net::Amazon);
 
+use Net::Amazon::Property::DVD;
 use Net::Amazon::Property::Book;
 use Net::Amazon::Property::Music;
 use Data::Dumper;
@@ -34,6 +35,15 @@ sub new {
         $self->$attr($options{xmlref}->{$attr});
     }
 
+    # The release date is sometimes missing
+    $class->SUPER::make_accessor("year");
+    if($options{xmlref}->{ReleaseDate}) {
+        my ($year) = ($options{xmlref}->{ReleaseDate} =~ /(\d{4})/);
+        $self->year($year);
+    } else {
+        $self->year("");
+    }
+
     return $self;
 }
 
@@ -42,8 +52,17 @@ sub as_string {
 ##################################################
     my($self) = @_;
 
-    $Data::Dumper::Indent = 1; 
-    return Data::Dumper::Dumper($self->{xmlref});
+    my $result = "\"$self->{xmlref}->{ProductName}\", ";
+
+    if($self->{xmlref}->{Manufacturer}) {
+        $result .= "$self->{xmlref}->{Manufacturer}, ";
+    }
+
+    $result .= $self->year() . ", " if $self->year();
+
+    $result .= $self->OurPrice() . ", ";
+    $result .= $self->Asin();
+    return $result;
 }
 
 ##################################################
@@ -54,7 +73,7 @@ sub factory {
     my $xmlref = $options{xmlref};
     die "Called factory without xmlref" unless $xmlref;
 
-    DEBUG("xmlref=", Data::Dumper::Dumper($xmlref));
+    DEBUG(sub {"xmlref=" . Data::Dumper::Dumper($xmlref)});
 
     my $catalog = $xmlref->{Catalog};
     my $obj;
@@ -66,6 +85,9 @@ sub factory {
     } elsif($catalog eq "Music") {
         DEBUG("Creating new Music Property");
         $obj = Net::Amazon::Property::Music->new(xmlref => $xmlref);
+    } elsif($catalog eq "DVD") {
+        DEBUG("Creating new DVD Property");
+        $obj = Net::Amazon::Property::DVD->new(xmlref => $xmlref);
     } else {
         DEBUG("Creating new Default Property ($catalog)");
         $obj = Net::Amazon::Property->new(xmlref => $xmlref);
@@ -172,6 +194,10 @@ Amazon price of the item
 =item UsedPrice()
 
 Used price of the item
+
+=item year()
+
+The release year extracted from ReleaseDate()
 
 =back
 

@@ -36,7 +36,7 @@ $req = Net::Amazon::Request::ASIN->new(
 );
 
    # Response is of type Net::Amazon::ASIN::Response
-my $resp = $ua->request($req);
+$resp = $ua->request($req);
 
 ok($resp->is_error(), "Error reported correctly");
 like($resp->message(), qr/Invalid/, "Invalid ASIN reported correctly");
@@ -74,7 +74,7 @@ $req = Net::Amazon::Request::ASIN->new(
 );
 
    # Response is of type Net::Amazon::ASIN::Response
-my $resp = $ua->request($req);
+$resp = $ua->request($req);
 
 ok($resp->is_success(), "Successful fetch");
 like($resp->as_string(), qr/Zwan/, "Found Zwan");

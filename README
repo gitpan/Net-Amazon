@@ -1,5 +1,5 @@
 ######################################################################
-    Net::Amazon 0.05
+    Net::Amazon 0.06
 ######################################################################
 
 NAME
@@ -94,9 +94,9 @@ DESCRIPTION
 
     "properties()" returns one or more "Net::Amazon::Property" objects of
     type "Net::Amazon::Property" (or one of its subclasses like
-    "Net::Amazon::Property::Book" or "Net::Amazon::Property::Music"), each
-    of which features accessors named after the attributes of the product
-    found in Amazon's database:
+    "Net::Amazon::Property::Book", "Net::Amazon::Property::Music" or
+    Net::Amazon::Property::DVD), each of which features accessors named
+    after the attributes of the product found in Amazon's database:
 
         for ($resp->properties) {
            print $_->Asin(), " ",
