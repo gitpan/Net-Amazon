@@ -5,6 +5,9 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
+use warnings;
+use strict;
+
 use Test::More tests => 22;
 BEGIN { use_ok('Net::Amazon') };
 
@@ -49,7 +52,7 @@ $req = Net::Amazon::Request::ASIN->new(
 );
 
    # Response is of type Net::Amazon::ASIN::Response
-my $resp = $ua->request($req);
+$resp = $ua->request($req);
 
 ok($resp->is_success(), "Found Gamma");
 my($book) = $resp->properties();
@@ -98,7 +101,7 @@ $req = Net::Amazon::Request::ASIN->new(
 );
 
    # Response is of type Net::Amazon::ASIN::Response
-my $resp = $ua->request($req);
+$resp = $ua->request($req);
 
 ok($resp->is_success(), "Successful fetch");
 like($resp->as_string(), qr(Anne Sofie von Otter/Elvis Costello), 

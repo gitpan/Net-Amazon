@@ -9,9 +9,9 @@ use warnings;
 
 use Net::Amazon;
 use Net::Amazon::Request::Wishlist;
-use Log::Log4perl qw(:easy);
 
-Log::Log4perl->easy_init($DEBUG);
+#use Log::Log4perl qw(:easy);
+#Log::Log4perl->easy_init($DEBUG);
 
 die "usage: $0 wishlist_id\n" .
     "(use 1XL5DWOUFMFVJ as an example)\n" unless $ARGV[0];

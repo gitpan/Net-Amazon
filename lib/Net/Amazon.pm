@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.08';
+our $VERSION          = '0.09';
 our $AMZN_XML_URL     = "http://xml.amazon.com/onca/xml2";
 our @CANNED_RESPONSES = ();
 
@@ -18,6 +18,12 @@ use XML::Simple;
 use Data::Dumper;
 use URI;
 use Log::Log4perl qw(:easy);
+
+use Net::Amazon::Request::ASIN;
+use Net::Amazon::Request::Artist;
+use Net::Amazon::Request::Keyword;
+use Net::Amazon::Request::Wishlist;
+use Net::Amazon::Request::UPC;
 
 ##################################################
 sub new {
@@ -38,6 +44,33 @@ sub new {
                };
 
     bless $self, $class;
+}
+
+##################################################
+sub search {
+##################################################
+    my($self, %params) = @_;
+
+    my $req;
+
+    if(0) {
+    } elsif(exists $params{asin}) {
+        $req = Net::Amazon::Request::ASIN->new(%params);
+    } elsif(exists $params{artist}) {
+        $req = Net::Amazon::Request::Artist->new(%params);
+    } elsif(exists $params{wishlist}) {
+        $req = Net::Amazon::Request::Wishlist->new(
+                                   id => $params{wishlist}, %params);
+    } elsif(exists $params{upc}) {
+        $req = Net::Amazon::Request::UPC->new(%params);
+    } elsif(exists $params{keyword}) {
+        $req = Net::Amazon::Request::Keyword->new(%params);
+    } else {
+        warn "No Net::Amazon::Request type could be determined";
+        return;
+    }
+
+    return $self->request($req);
 }
 
 ##################################################
@@ -260,19 +293,15 @@ Net::Amazon - Framework for accessing amazon.com via SOAP and XML/HTTP
 
   use Net::Amazon;
 
-  my $ua = Net::Amazon->new(
-      token       => 'YOUR_AMZN_TOKEN'
-  );
+  my $ua = Net::Amazon->new(token => 'YOUR_AMZN_TOKEN');
 
-  my $req = Net::Amazon::Request::ASIN->new( 
-      asin  => '0201360683'
-  );
+  my $resp = $ua->search(asin => '0201360683');
 
     # Response is of type Net::Amazon::Response::ASIN
   my $resp = $ua->request($req);
 
   if($resp->is_success()) {
-      print $resp->as_string();
+      print $resp->as_string(), "\n";
   } else {
       print "Error: ", $resp->message(), "\n";
   }
@@ -290,8 +319,8 @@ C<Net::Amazon> works very much like C<LWP>: First you define a useragent
 like
 
   my $ua = Net::Amazon->new(
-      token       => 'YOUR_AMZN_TOKEN',
-      max_pages   => 3,
+      token     => 'YOUR_AMZN_TOKEN',
+      max_pages => 3,
   );
 
 which you pass your personal amazon developer's token (can be obtained
@@ -300,46 +329,41 @@ result pages the agent is going to request from Amazon in case all
 results don't fit on a single page (typically holding 20 items).
 
 According to the different search methods on Amazon, there's a bunch
-of different request objects in C<Net::Amazon>:
+of different request types in C<Net::Amazon>. The user agent's 
+convenience method C<search()> triggers different request objects, 
+depending on which parameters you pass to it:
 
 =over 4
 
-=item Net::Amazon::Request::ASIN
+=item C<< $ua->search(asin => "0201360683") >>
 
-Search by ASIN, mandatory parameter C<asin>. 
-Returns at most one result.
+The C<asin> parameter has Net::Amazon search for an item with the 
+specified ASIN. Returns at most one result.
 
-=item Net::Amazon::Request::Artist
+=item C<< $ua->search(artist => "Rolling Stones") >>
 
-Music search by Artist, mandatory parameter C<artist>.
+The C<artist> parameter has the user agent search for items created by
+the specified artist. Can return many results.
+
+=item C<< $ua->search(keyword => "perl xml", mode => "books") >>
+
+Search by keyword, mandatory parameters C<keyword> and C<mode>.
 Can return many results.
 
-=item Net::Amazon::Request::Keyword
+=item C<< $ua->search(wishlist => "1XL5DWOUFMFVJ") >>
 
-Music search by Artist, mandatory parameters C<keyword> and C<mode>.
+Search for all items in a specified wishlist.
 Can return many results.
 
-=item Net::Amazon::Request::UPC
+=item C<< $ua->search(upc => "075596278324", mode => "music") >>
 
 Music search by UPC (product barcode), mandatory parameter C<upc>.
 C<mode> has to be set to C<music>. Returns at most one result.
 
 =back
 
-Check the respective man pages for details on these request objects
-(However, they haven't been written yet, so check later :).
-Request objects are typically created like this (with a Keyword query
-as an example):
-
-    my $req = Net::Amazon::Request::Keyword->new(
-        keyword   => 'perl',
-        mode      => 'books',
-    );
-
-and are handed over to the user agent like that:
-
-    # Response is of type Net::Amazon::Response::ASIN
-  my $resp = $ua->request($req);
+The user agent's C<search> method returns a response object, which can be 
+checked for success or failure:
 
   if($resp->is_success()) {
       print $resp->as_string();
@@ -347,7 +371,7 @@ and are handed over to the user agent like that:
       print "Error: ", $resp->message(), "\n";
   }
 
-The user agent returns a response object, containing one or more
+In case the request succeeds, the response contains one or more
 Amazon 'properties', as it calls the products found.
 All matches can be retrieved from the Response 
 object using it's C<properties()> method.
@@ -376,6 +400,56 @@ C<Net::Amazon::Property::Music> feature convenience methods like
 C<authors()> (returning the list of authors of a book) or 
 C<album()> for CDs, returning the album title.
 
+=head2 Requests behind the scenes
+
+C<Net::Amazon>'s C<search()> method is just a convenient way to 
+create different kinds of requests objects behind the scenes and
+trigger them to send requests to Amazon.
+
+Depending on the parameters fed to the C<search> method, C<Net::Amazon> will
+determine the kind of search requested and create one of the following
+request objects:
+
+=over 4
+
+=item Net::Amazon::Request::ASIN
+
+Search by ASIN, mandatory parameter C<asin>. 
+Returns at most one result.
+
+=item Net::Amazon::Request::Artist
+
+Music search by Artist, mandatory parameter C<artist>.
+Can return many results.
+
+=item Net::Amazon::Request::Keyword
+
+Keyword search, mandatory parameters C<keyword> and C<mode>.
+Can return many results.
+
+=item Net::Amazon::Request::UPC
+
+Music search by UPC (product barcode), mandatory parameter C<upc>.
+C<mode> has to be set to C<music>. Returns at most one result.
+
+=back
+
+Check the respective man pages for details on these request objects.
+Request objects are typically created like this (with a Keyword query
+as an example):
+
+    my $req = Net::Amazon::Request::Keyword->new(
+        keyword   => 'perl',
+        mode      => 'books',
+    );
+
+and are handed over to the user agent like that:
+
+    # Response is of type Net::Amazon::Response::ASIN
+  my $resp = $ua->request($req);
+
+The convenient C<search()> method just does these two steps in one.
+
 =head2 METHODS
 
 =over 4
@@ -390,21 +464,21 @@ Additional optional parameters:
 
 =over 4
 
-=item max_pages =E<gt> $max_pages
+=item C<< max_pages => $max_pages >>
 
 sets how many 
 result pages the module is supposed to fetch back from Amazon, which
 only sends back 10 results per page. 
 
-=item affiliate_id =E<gt> $affiliate_id
+=item C<< affiliate_id => $affiliate_id >>
 
 your Amazon affiliate ID, if you have one. It defaults to 
-C<webservices-20> which is currently (as of 05/2003) 
+C<webservices-20> which is currently (as of 06/2003) 
 required by Amazon.
 
 =back
 
-=item $resp = $ua->request($request)
+=item C<< $resp = $ua->request($request) >>
 
 Sends a request to the Amazon web service. C<$request> is of a 
 C<Net::Amazon::Request::*> type and C<$response> will be of the 
@@ -414,7 +488,7 @@ corresponding C<Net::Amazon::Response::*> type.
 
 =head2 Accessing foreign Amazon Catalogs
 
-As of this writing (June 2003), Amazon also offers its web service for
+As of this writing (06/2003), Amazon also offers its web service for
 its UK catalog. Just pass
 
     locale => 'uk'
@@ -431,7 +505,7 @@ Here's a full-fledged example doing a artist search:
     use Net::Amazon::Request::Artist;
     use Data::Dumper;
 
-    die "usage: $0 artist\n(use Zwan as an example)\n" 
+    die "usage: $0 artist\n(use Zwan as an example)\n"
         unless defined $ARGV[0];
 
     my $ua = Net::Amazon->new(
@@ -445,13 +519,17 @@ Here's a full-fledged example doing a artist search:
        # Response is of type Net::Amazon::Artist::Response
     my $resp = $ua->request($req);
 
-    print $resp->as_string, "\n";
+    if($resp->is_success()) {
+        print $resp->as_string, "\n";
+    } else {
+        print $resp->message(), "\n";
+    }
 
 And here's one displaying someone's wishlist:
 
     use Net::Amazon;
     use Net::Amazon::Request::Wishlist;
-    
+
     die "usage: $0 wishlist_id\n" .
         "(use 1XL5DWOUFMFVJ as an example)\n" unless $ARGV[0];
 
@@ -465,8 +543,12 @@ And here's one displaying someone's wishlist:
 
        # Response is of type Net::Amazon::ASIN::Response
     my $resp = $ua->request($req);
-    
-    print $resp->as_string, "\n";
+
+    if($resp->is_success()) {
+        print $resp->as_string, "\n";
+    } else {
+        print $resp->message(), "\n";
+    }
 
 =head1 DEBUGGING
 
@@ -483,7 +565,9 @@ C<Log::Log4perl>, e.g. like
     # ...
 
 you'll see what's going on behind the scenes, what URLs the module 
-is requesting from Amazon and so forth.
+is requesting from Amazon and so forth. Log::Log4perl allows all kinds
+of fancy stuff, like writing to a file or enabling verbosity in certain
+parts only -- check http://log4perl.sourceforge.net for details.
 
 =head1 INSTALLATION
 
@@ -492,7 +576,10 @@ simply saying
 
     perl -MCPAN -eshell 'install Log::Log4perl'
 
-Then, C<Net::Amazon> installs with the typical sequence
+Also, it needs XML::Simple 2.x, which can be obtained in a similar way.
+
+Once all dependencies have been resolved, C<Net::Amazon> installs with
+the typical sequence
 
     perl Makefile.PL
     make

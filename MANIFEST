@@ -4,9 +4,14 @@ MANIFEST.SKIP
 Makefile.PL
 README
 eg/artist
+eg/asin
+eg/asin_fetch
+eg/asin_img
+eg/cheapo
 eg/heavy
+eg/keyword
 eg/maxauthors
-eg/similar
+eg/upc
 eg/wishlist
 lib/Net/Amazon.pm
 lib/Net/Amazon/Property.pm

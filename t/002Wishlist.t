@@ -5,6 +5,9 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
+use strict;
+use warnings;
+
 use Test::More tests => 6;
 BEGIN { use_ok('Net::Amazon') };
 
@@ -36,7 +39,7 @@ my $req = Net::Amazon::Request::Wishlist->new(
 );
 
    # Response is of type Net::Amazon::ASIN::Response
-$resp = $ua->request($req);
+my $resp = $ua->request($req);
 
 like($resp->as_string(), qr#Richard M. Stallman/Lawrence Lessig/Joshua Gay#, "Found Stallman");
 
@@ -54,7 +57,7 @@ $ua = Net::Amazon->new(
     token       => 'YOUR_AMZN_TOKEN',
 );
 
-my $req = Net::Amazon::Request::Wishlist->new(
+$req = Net::Amazon::Request::Wishlist->new(
     id  => '1XL5DWOUFMFVJ'
 );
 
@@ -77,7 +80,7 @@ $ua = Net::Amazon->new(
     token       => 'YOUR_AMZN_TOKEN',
 );
 
-my $req = Net::Amazon::Request::Wishlist->new(
+$req = Net::Amazon::Request::Wishlist->new(
     id  => '1XL5DWOUFMFVJ'
 );
 
@@ -99,7 +102,7 @@ $req = Net::Amazon::Request::Wishlist->new(
 );
 
    # Response is of type Net::Amazon::ASIN::Response
-my $resp = $ua->request($req);
+$resp = $ua->request($req);
 
 ok($resp->is_success(), "Successful fetch");
 like($resp->as_string(), qr#Richard M. Stallman/Lawrence Lessig/Joshua Gay#, "Live watchlist fetch");

@@ -24,4 +24,8 @@ my $req = Net::Amazon::Request::Artist->new(
    # Response is of type Net::Amazon::Artist::Response
 my $resp = $ua->request($req);
 
-print $resp->as_string, "\n";
+if($resp->is_success()) {
+    print $resp->as_string, "\n";
+} else {
+    print $resp->message, "\n";
+}

@@ -6,7 +6,7 @@ WriteMakefile(
     'NAME'		=> 'Net::Amazon',
     'VERSION_FROM'	=> 'lib/Net/Amazon.pm', # finds $VERSION
     'PREREQ_PM'		=> { Log::Log4perl  => 0.30,
-                             XML::Simple    => 2,
+                             XML::Simple    => 2.08,
                              LWP::UserAgent => 2,
                              Data::Dumper   => undef,
                              URI            => undef,

@@ -1,8 +1,5 @@
-eg/asin_fetch
-eg/asin_img
-eg/cheapo
-eg/keyword
 blib
+eg/similar
 ^Makefile$
 ^Makefile.old$
 CVS

@@ -1,5 +1,11 @@
 Revision history for Perl extension Net::Amazon:
 
+0.09 (06/24/2003)
+   (ms) Tony Bowden <tony@kasei.com> suggested to have a $ua->search
+        method, abstracting the usage of the different request objects.
+        Implemented that.
+   (ms) Resolved warnings and strict errors in test cases
+
 0.08 (06/22/2003)
    (ms) Changed dependencies to 5.006, XML::Simple and LWP::UserAgent
 
