@@ -82,9 +82,11 @@ sub properties {
 
     my @properties = ();
 
-    foreach my $xmlref (@{$self->{xmlref}->{Details}}) {
-        my $property = Net::Amazon::Property::factory(xmlref => $xmlref);
-        push @properties, $property;
+    if($self->is_success) {
+        foreach my $xmlref (@{$self->{xmlref}->{Details}}) {
+            my $property = Net::Amazon::Property::factory(xmlref => $xmlref);
+            push @properties, $property;
+        }
     }
 
     return (@properties);

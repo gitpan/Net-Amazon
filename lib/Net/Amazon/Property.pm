@@ -91,7 +91,7 @@ Net::Amazon::Property - Baseclass for products on amazon.com
   if($resp->is_success()) {
       for my $prop ($resp->properties) {
           print $_->ProductName(), " ",
-                $_->Manufacturer(), " ";
+                $_->Manufacturer(), " ",
                 $_->OurPrice(), "\n";
 
 =head1 DESCRIPTION

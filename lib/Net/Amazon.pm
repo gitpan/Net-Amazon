@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION      = '0.02';
+our $VERSION      = '0.03';
 our $AMZN_XML_URL = "http://xml.amazon.com/onca/xml2";
 
 use LWP::Simple ();
@@ -24,6 +24,10 @@ sub new {
 
     if(! exists $options{token}) {
         die "Mandatory paramter 'token' not defined";
+    }
+
+    if(! exists $options{affiliate_id}) {
+        $options{affiliate_id} = "webservices-20";
     }
 
     my $self = {
@@ -58,6 +62,7 @@ sub request {
 
         $url->query_form(
             'dev-t' => $self->{token},
+            't'     => $self->{affiliate_id},
             %params,
         );
 
@@ -71,6 +76,8 @@ sub request {
             $res->status("");
             return $res;
         }
+
+        DEBUG(sub { "Received [ " . $xml . "]" });
 
         my $xs = XML::Simple->new();
         $ref = $xs->XMLin($xml);
@@ -273,13 +280,29 @@ C<album()> for CDs, returning the album title.
 
 =over 4
 
-=item $ua = Net::Amazon->new(token => $token, [max_pages => $max_pages])
+=item $ua = Net::Amazon->new(token => $token, ...)
 
 Create a new Net::Amazon useragent. C<$token> is the value of 
 the mandatory Amazon developer's token, which can be obtained from
-http://amazon.com/soap. C<$max_pages> is optional and sets how many 
+http://amazon.com/soap. 
+
+Additional optional parameters:
+
+=over 4
+
+=item max_pages =E<gt> $max_pages
+
+sets how many 
 result pages the module is supposed to fetch back from Amazon, which
-only sends back 10 results per page.
+only sends back 10 results per page. 
+
+=item affiliate_id =E<gt> $affiliate_id
+
+your Amazon affiliate ID, if you have one. It defaults to 
+C<webservices-20> which is currently (as of 05/2003) 
+required by Amazon.
+
+=back
 
 =item $resp = $ua->request($request)
 
@@ -368,8 +391,11 @@ Then, C<Net::Amazon> installs with the typical sequence
 Make sure you're connected to the Internet while running C<make test>
 because it will actually contact amazon.com and run a couple of live tests.
 
-It is currently available on http://perlmeister.com/devel/#amzn but
-might be uploaded to CPAN at some point.
+The module's distribution tarball and documentation are available at
+
+    http://perlmeister.com/devel/#amzn 
+
+and on CPAN.
 
 =head1 SEE ALSO
 

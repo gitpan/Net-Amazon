@@ -1,5 +1,5 @@
 ######################################################################
-    Net::Amazon 0.02
+    Net::Amazon 0.03
 ######################################################################
 
 NAME
@@ -109,12 +109,21 @@ DESCRIPTION
     CDs, returning the album title.
 
   METHODS
-    $ua = Net::Amazon->new(token => $token, [max_pages => $max_pages])
+    $ua = Net::Amazon->new(token => $token, ...)
         Create a new Net::Amazon useragent. $token is the value of the
         mandatory Amazon developer's token, which can be obtained from
-        http://amazon.com/soap. $max_pages is optional and sets how many
-        result pages the module is supposed to fetch back from Amazon, which
-        only sends back 10 results per page.
+        http://amazon.com/soap.
+
+        Additional optional parameters:
+
+        max_pages => $max_pages
+            sets how many result pages the module is supposed to fetch back
+            from Amazon, which only sends back 10 results per page.
+
+        affiliate_id => $affiliate_id
+            your Amazon affiliate ID, if you have one. It defaults to
+            "webservices-20" which is currently (as of 05/2003) required by
+            Amazon.
 
     $resp = $ua->request($request)
         Sends a request to the Amazon web service. $request is of a
@@ -198,8 +207,11 @@ INSTALLATION
     because it will actually contact amazon.com and run a couple of live
     tests.
 
-    It is currently available on http://perlmeister.com/devel/#amzn but
-    might be uploaded to CPAN at some point.
+    The module's distribution tarball and documentation are available at
+
+        http://perlmeister.com/devel/#amzn 
+
+    and on CPAN.
 
 SEE ALSO
 AUTHOR

@@ -11,6 +11,10 @@ BEGIN { use_ok('Net::Amazon') };
 use Net::Amazon::Request::Wishlist;
 use Net::Amazon::Response::Wishlist;
 
+#use Log::Log4perl qw(:easy);
+#Log::Log4perl->easy_init({level  => $DEBUG, file => "STDOUT",
+#                          layout => "%F{1}%L> %m%n" });
+
 ######################################################################
 # Successful Wishlist fetch
 ######################################################################
@@ -26,4 +30,4 @@ my $req = Net::Amazon::Request::Wishlist->new(
 my $resp = $ua->request($req);
 
 ok($resp->is_success(), "Successful fetch");
-like($resp->as_string(), qr#Alfred V. Aho/Ravi Sethi/Jeffrey D. Ullman#, "Found Aho");
+like($resp->as_string(), qr#Richard M. Stallman/Lawrence Lessig/Joshua Gay#, "Found Stallman");
