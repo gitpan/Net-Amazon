@@ -13,6 +13,15 @@ use Log::Log4perl qw(:easy);
 use warnings; 
 use strict;
 
+our @DEFAULT_ATTRIBUTES = qw(
+  OurPrice ImageUrlLarge ImageUrlMedium ImageUrlSmall
+  ReleaseDate Catalog Asin url Manufacturer UsedPrice
+  ListPrice ProductName Availability SalesRank);
+
+__PACKAGE__->make_accessor($_) for @DEFAULT_ATTRIBUTES;
+__PACKAGE__->make_accessor($_) for qw(year review_set);
+__PACKAGE__->make_array_accessor($_) for qw(browse_nodes);
+
 ##################################################
 sub new {
 ##################################################
@@ -29,15 +38,11 @@ sub new {
     bless $self, $class;
 
         # Set default attributes
-    for my $attr (qw(OurPrice ImageUrlLarge ImageUrlMedium ImageUrlSmall
-                     ReleaseDate Catalog Asin url Manufacturer UsedPrice
-                     ListPrice ProductName Availability SalesRank)) {
-        $class->SUPER::make_accessor($attr);
+    for my $attr (@DEFAULT_ATTRIBUTES) {
         $self->$attr($options{xmlref}->{$attr});
     }
 
     # The release date is sometimes missing
-    $class->SUPER::make_accessor("year");
     if($options{xmlref}->{ReleaseDate}) {
         my ($year) = ($options{xmlref}->{ReleaseDate} =~ /(\d{4})/);
         $self->year($year);
@@ -45,7 +50,17 @@ sub new {
         $self->year("");
     }
 
-    $class->SUPER::make_accessor("review_set");
+    my $browse_nodes = $options{xmlref}->{BrowseList}->{BrowseNode};
+    if(ref($browse_nodes) eq "ARRAY") {
+      my @nodes = map {
+        $_->{BrowseName}
+      } @{ $browse_nodes };
+      $self->browse_nodes(\@nodes);
+    } elsif (ref($browse_nodes) eq "HASH") {
+      $self->browse_nodes([ $browse_nodes->{BrowseName} ]);
+    } else {
+      $self->browse_nodes([ ]);
+    }
 
     return $self;
 }
@@ -225,6 +240,10 @@ Sales rank of the item (contains digits and commas, like 1,000,001)
 =item year()
 
 The release year extracted from ReleaseDate()
+
+=item browse_nodes()
+
+Returns a list of browse nodes (text string categories) for that item.
 
 =back
 

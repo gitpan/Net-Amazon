@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.24';
+our $VERSION          = '0.25';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -43,6 +43,7 @@ sub new {
 
     my $self = {
         max_pages => 5,
+        ua        => LWP::UserAgent->new(),
         %options,
                };
 
@@ -259,7 +260,9 @@ sub fetch_url {
         INFO("Cache miss");
     }
 
-    my $ua = LWP::UserAgent->new();
+    my $ua = $self->{ua};
+    $ua->env_proxy();
+
     my $resp;
 
     {
@@ -798,6 +801,35 @@ adheres to the following interface can be used:
         # Return a cached value, 'undef' if it doesn't exist
     $cache->get($key);
 
+=head1 PROXY SETTINGS
+
+C<Net::Amazon> uses C<LWP::UserAgent> under the hood to send
+web requests to Amazon's web site. If you're in an environment where
+all Web traffic goes through a proxy, there's two ways to configure that.
+
+First, C<Net::Amazon> picks up proxy settings from environment variables:
+
+    export http_proxy=http://proxy.my.place:8080
+
+in the surrounding shell or setting
+
+    $ENV{http_proxy} = "http://proxy.my.place:8080";
+
+in your Perl script
+will route all requests through the specified proxy.
+
+Secondly, you can
+pass a user agent instance to Net::Amazon's constructor:
+
+    use Net::Amazon;
+    use LWP::UserAgent;
+
+    my $ua = LWP::UserAgent->new();
+    my $na = Net::Amazon->new(ua => $ua, token => 'YOUR_AMZN_TOKEN');
+    # ...
+
+This way, you can configure C<$ua> up front before Net::Amazon will use it.
+
 =head1 DEBUGGING
 
 If something's going wrong and you want more verbosity, just bump up
@@ -1049,6 +1081,7 @@ Contributors (thanks y'all!):
     Padraic Renaghan <padraic@renaghan.com>
     rayg <rayg@varchars.com>
     Robert Graff <rgraff@workingdemo.com>
+    Robert Rothenberg <wlkngowl@i-2000.com>
     Steve Rushe <steve@deeden.co.uk>
     Tatsuhiko Miyagawa <miyagawa@livedoor.jp>
     Tony Bowden <tony@kasei.com>
