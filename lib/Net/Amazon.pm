@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.11';
+our $VERSION          = '0.12';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -340,15 +340,12 @@ Net::Amazon - Framework for accessing amazon.com via SOAP and XML/HTTP
   my $ua = Net::Amazon->new(token => 'YOUR_AMZN_TOKEN');
 
     # Get a request object
-  my $req = $ua->search(asin => '0201360683');
+  my $response = $ua->search(asin => '0201360683');
 
-    # Response is of type Net::Amazon::Response::ASIN
-  my $resp = $ua->request($req);
-
-  if($resp->is_success()) {
-      print $resp->as_string(), "\n";
+  if($response->is_success()) {
+      print $response->as_string(), "\n";
   } else {
-      print "Error: ", $resp->message(), "\n";
+      print "Error: ", $response->message(), "\n";
   }
 
 =head1 ABSTRACT
@@ -369,7 +366,7 @@ like
   );
 
 which you pass your personal amazon developer's token (can be obtained
-from http://amazon.com/soap) and (optionally) the maximum number of 
+from L<http://amazon.com/soap>) and (optionally) the maximum number of 
 result pages the agent is going to request from Amazon in case all
 results don't fit on a single page (typically holding 20 items).
 
@@ -453,7 +450,7 @@ C<album()> for CDs, returning the album title.
 =head2 Requests behind the scenes
 
 C<Net::Amazon>'s C<search()> method is just a convenient way to 
-create different kinds of requests objects behind the scenes and
+create different kinds of request objects behind the scenes and
 trigger them to send requests to Amazon.
 
 Depending on the parameters fed to the C<search> method, C<Net::Amazon> will
@@ -508,7 +505,7 @@ The convenient C<search()> method just does these two steps in one.
 
 Create a new Net::Amazon useragent. C<$token> is the value of 
 the mandatory Amazon developer's token, which can be obtained from
-http://amazon.com/soap. 
+L<http://amazon.com/soap>. 
 
 Additional optional parameters:
 
@@ -620,6 +617,16 @@ you'll see what's going on behind the scenes, what URLs the module
 is requesting from Amazon and so forth. Log::Log4perl allows all kinds
 of fancy stuff, like writing to a file or enabling verbosity in certain
 parts only -- check http://log4perl.sourceforge.net for details.
+
+=head1 LIVE TESTING
+
+Results returned by Amazon can be incomplete or simply wrong at times,
+due to their "best effort" design of the service. This is why the test
+suite that comes with this module has been changed to perform its test
+cases against canned data. If you want to perform the tests against
+the live Amazon servers instead, just set the environment variable
+
+    NET_AMAZON_LIVE_TESTS=1
 
 =head1 INSTALLATION
 
