@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.14';
+our $VERSION          = '0.15';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -20,10 +20,12 @@ use Log::Log4perl qw(:easy);
 
 use Net::Amazon::Request::ASIN;
 use Net::Amazon::Request::Artist;
+use Net::Amazon::Request::BrowseNode;
 use Net::Amazon::Request::Keyword;
 use Net::Amazon::Request::Wishlist;
 use Net::Amazon::Request::UPC;
 use Net::Amazon::Request::Similar;
+use Net::Amazon::Request::Power;
 
 ##################################################
 sub new {
@@ -70,6 +72,11 @@ sub search {
     } elsif(exists $params{similar}) {
         $req = Net::Amazon::Request::Similar->new(asin => $params{similar},
                                                   %params);
+    } elsif(exists $params{power}) {
+        $req = Net::Amazon::Request::Power->new(%params);
+    } elsif(exists $params{browsenode}) {
+        $req = Net::Amazon::Request::BrowseNode->new(%params);
+
     } else {
         warn "No Net::Amazon::Request type could be determined";
         return;
@@ -401,6 +408,12 @@ specified ASIN. Returns at most one result.
 The C<artist> parameter has the user agent search for items created by
 the specified artist. Can return many results.
 
+=item C<< $ua->search(browsenode=>"4025", mode=>"books" [, keywords=>"perl"]) >>
+
+Returns a list of items by category ID (node). For example node "4025"
+is the CGI books category.  You can add a keywords parameter to filter 
+the results by that keyword.
+
 =item C<< $ua->search(keyword => "perl xml", mode => "books") >>
 
 Search by keyword, mandatory parameters C<keyword> and C<mode>.
@@ -420,6 +433,11 @@ C<mode> has to be set to C<music>. Returns at most one result.
 
 Search for all items similar to the one represented by the ASIN provided.
 Can return many results.
+
+=item C<< $ua->search(power => "subject: perl and author: schwartz", mode => "books") >>
+
+Initiate a power search for all books matching the power query.
+Can return many results. See L<Net::Amazon::Request::Power> for details.
 
 =back
 
@@ -488,6 +506,11 @@ Returns at most one result.
 
 Music search by Artist, mandatory parameter C<artist>.
 Can return many results.
+
+=item Net::Amazon::Request::BrowseNode
+
+Returns category (node) listing. Mandatory parameters C<browsenode>
+(must be numeric) and C<mode>. Can return many results.
 
 =item Net::Amazon::Request::Keyword
 
@@ -631,7 +654,7 @@ implementation will do as well, see the requirements below.
 Here's an example utilizing a file cache which causes C<Net::Amazon> to
 cache responses for 30 minutes:
 
-    use File::Cache;
+    use Cache::File;
 
     my $cache = Cache::File->new( 
         cache_root        => '/tmp/mycache',
@@ -705,6 +728,9 @@ Get Net::Amazon from CVS. Use
     cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/Net-Amazon login
     cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/Net-Amazon co Net-Amazon
 
+If this doesn't work (and it didn't work at the time of this writing), just
+use the latest distribution from net-amazon.sourceforge.net.
+
 =item *
 
 Write a new Net::Amazon::Request::XYZ package, start with this template
@@ -755,12 +781,24 @@ to Net/Amazon.pm.
 
 =back
 
-And that's it! Check out the different Net::Amazon::Request::*
+And that's it! Again, don't forget the I<add documentation> part. Modules
+without documentation are of no use to anybody but yourself. 
+
+Check out the different Net::Amazon::Request::*
 and Net::Amazon::Response modules in the distribution if you need to adapt
 your new module to fulfil any special needs, like a different Amazon URL
 or a different way to handle the as_string() method. Also, post
 and problems you might encounter to the mailing list, we're gonna help you
 out.
+
+If possible, provide a test case for your extension. When finished, send 
+a patch to the mailing list at 
+
+   net-amazon-devel@lists.sourceforge.net
+
+and if it works, I'll accept it and will work it into the main distribution.
+Your name will show up in the contributor's list below (unless you tell
+me otherwise).
 
 =head1 INSTALLATION
 
@@ -800,11 +838,22 @@ where you can find documentation, news and the latest development and
 stable releases for download. If you have questions about how to
 use C<Net::Amazon>, want to report a bug or just participate in its
 development, please send a message to the mailing 
-list amazon-net-devel@lists.sourceforge.net
+list net-amazon-devel@lists.sourceforge.net
 
 =head1 AUTHOR
 
 Mike Schilli, E<lt>na@perlmeister.comE<gt> (Please contact me via the mailing list: net-amazon-devel@lists.sourceforge.net )
+
+Contributors (thanks y'all!):
+
+    Barnaby Claydon <bclaydon@perseus.com>
+    Dan Sully <daniel@electricrain.com>
+    Jackie Hamilton <kira@cgi101.com>
+    Konstantin Gredeskoul <kig@get.topica.com>
+    Martha Greenberg <marthag@mit.edu>
+    Martin Streicher <martin.streicher@apress.com>
+    Mike Evron <evronm@dtcinc.net>
+    Tony Bowden <tony@kasei.com>
 
 =head1 COPYRIGHT AND LICENSE
 
