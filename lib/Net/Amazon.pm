@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.20';
+our $VERSION          = '0.21';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -103,6 +103,11 @@ sub intl_url {
 
     if(! exists $self->{locale}) {
         return $url;
+    }
+
+    if ($self->{locale} eq "jp") {
+       $url =~ s/\.com/.co.jp/;
+       return $url;
     }
 
     if($self->{locale} eq "uk" or
@@ -538,7 +543,23 @@ in Amazon's database:
              $_->OurPrice(), "\n";
     }
 
-Also the specialized classes C<Net::Amazon::Property::Book> and
+Commonly available accessors are 
+C<OurPrice()>,
+C<ImageUrlLarge()>,
+C<ImageUrlMedium()>,
+C<ImageUrlSmall()>,
+C<ReleaseDate()>,
+C<Catalog()>,
+C<Asin()>,
+C<url()>,
+C<Manufacturer()>,
+C<UsedPrice()>,
+C<ListPrice()>,
+C<ProductName()>,
+C<Availability()>.
+For details, check L<Net::Amazon::Property>.
+
+Also, the specialized classes C<Net::Amazon::Property::Book> and
 C<Net::Amazon::Property::Music> feature convenience methods like
 C<authors()> (returning the list of authors of a book) or 
 C<album()> for CDs, returning the album title.
@@ -969,6 +990,18 @@ and on CPAN.
 
 =head1 SEE ALSO
 
+The following modules play well within the C<Net::Amazon> framework:
+
+=over 4
+
+=item C<Net::Amazon::RemoteCart>
+
+by David Emery E<lt>dave@skiddlydee.comE<gt> provides a complete API for
+creating Amazon shopping carts on a local site, managing them and finally 
+submitting them to Amazon for checkout. It is available on CPAN.
+
+=back
+
 =head1 CONTACT
 
 The C<Net::Amazon> project's home page is hosted on 
@@ -999,6 +1032,7 @@ Contributors (thanks y'all!):
     Padraic Renaghan <padraic@renaghan.com>
     rayg <rayg@varchars.com>
     Robert Graff <rgraff@workingdemo.com>
+    Tatsuhiko Miyagawa <miyagawa@livedoor.jp>
     Tony Bowden <tony@kasei.com>
 
 =head1 COPYRIGHT AND LICENSE
