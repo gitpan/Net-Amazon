@@ -1,6 +1,9 @@
 Revision history for Perl extension Net::Amazon:
 
-0.07 not yet released
+0.08 (06/22/2003)
+   (ms) Changed dependencies to 5.006, XML::Simple and LWP::UserAgent
+
+0.07 (06/10/2003)
    (ms) fixed bug with single-item-wishlists
    (ms) Lists printed as strings now have numbered bullets
    (ms) Tests are using new wishlist 1XL5DWOUFMFVJ (Net::Amazon)
