@@ -8,6 +8,7 @@ eg/asin_dvd
 eg/asin_fetch
 eg/asin_img
 eg/asin_mult
+eg/asin_offerall
 eg/blended.pl
 eg/browse
 eg/cd_fetch
@@ -64,7 +65,7 @@ lib/Net/Amazon/Result/Seller/Listing.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
-META.yml			Module meta-data (added by MakeMaker)
+META.yml
 README
 t/001ASIN.t
 t/002Wishlist.t
