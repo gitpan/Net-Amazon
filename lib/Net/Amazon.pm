@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.18';
+our $VERSION          = '0.19';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -78,6 +78,8 @@ sub search {
         $req = Net::Amazon::Request::Power->new(%params);
     } elsif(exists $params{browsenode}) {
         $req = Net::Amazon::Request::BrowseNode->new(%params);
+    } elsif(exists $params{manufacturer}) {
+        $req = Net::Amazon::Request::Manufacturer->new(%params);
 
     } else {
         warn "No Net::Amazon::Request type could be determined";
@@ -447,6 +449,12 @@ Can return many results.
 Initiate a power search for all books matching the power query.
 Can return many results. See L<Net::Amazon::Request::Power> for details.
 
+=item C<< $ua->search(manufacturer => "o'reilly", mode => "books") >>
+
+Initiate a search for all items made by a given manufacturrer.
+Can return many results. See L<Net::Amazon::Request::Manufacturer> 
+for details.
+
 =back
 
 The user agent's C<search> method returns a response object, which can be 
@@ -542,6 +550,16 @@ C<mode> has to be set to C<music>. Returns at most one result.
 No 'mode' parameter is allowed. According to Amazon's developer's kit, 
 this will result in up to three matches per category and can yield
 a total of 45 matches.
+
+=item Net::Amazon::Request::Power
+
+Understands power search strings. See L<Net::Amazon::Request::Power>
+for details. Mandatory parameter C<power>.
+
+=item Net::Amazon::Request::Manufacturer
+
+Searches for all items made by a given manufacturer. Mandatory parameter
+C<manufacturer>.
 
 =back
 
@@ -886,7 +904,8 @@ simply saying
 
     perl -MCPAN -eshell 'install Log::Log4perl'
 
-Also, it needs XML::Simple 2.x, which can be obtained in a similar way.
+Also, it needs LWP::UserAgent and XML::Simple 2.x, which can be obtained 
+in a similar way.
 
 Once all dependencies have been resolved, C<Net::Amazon> installs with
 the typical sequence
@@ -926,6 +945,7 @@ Mike Schilli, E<lt>na@perlmeister.comE<gt> (Please contact me via the mailing li
 Contributors (thanks y'all!):
 
     Barnaby Claydon <bclaydon@perseus.com>
+    Bill Fitzpatrick
     Brian Hirt <bhirt@mobygames.com>
     Dan Sully <daniel@electricrain.com>
     Jackie Hamilton <kira@cgi101.com>
