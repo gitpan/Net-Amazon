@@ -8,7 +8,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 27;
+use Test::More tests => 28;
 BEGIN { use_ok('Net::Amazon') };
 
 #use Log::Log4perl qw(:easy);
@@ -150,3 +150,5 @@ is(join('#', $dvd->directors()), "Brian De Palma",
 
 like(join('#', $dvd->starring()), qr/Tom Cruise#Jon Voight#Emmanuelle B/, 
      "starring() finds actors");
+
+is($resp->total_results, 1, "Total of 1");
