@@ -8,8 +8,9 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION      = '0.06';
-our $AMZN_XML_URL = "http://xml.amazon.com/onca/xml2";
+our $VERSION          = '0.07';
+our $AMZN_XML_URL     = "http://xml.amazon.com/onca/xml2";
+our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
 use HTTP::Request::Common;
@@ -151,6 +152,11 @@ sub fetch_url {
 
     INFO("Fetching $url");
 
+    if(@CANNED_RESPONSES) {
+        INFO("Serving canned response (testing)");
+        return shift @CANNED_RESPONSES;
+    }
+
     my $ua = LWP::UserAgent->new();
     my $resp;
 
@@ -214,23 +220,32 @@ sub xmlref_add {
 ##################################################
     my($self, $xmlref) = @_;
 
-    if(exists $self->{xmlref} and
-       ref($self->{xmlref}) eq "HASH" and
-       ref($self->{xmlref}->{Details}) eq "ARRAY") {
+    my $nof_items_added = 0;
 
-        my $newref = $xmlref->{Details};
-        $newref = [$newref] unless ref($newref) eq "ARRAY";
-        push @{$self->{xmlref}->{Details}}, @{$newref};
-        return scalar @{$newref};
-    } else {
-        $self->xmlref($xmlref);
-        if(exists $xmlref->{Details} and
-           ref($xmlref->{Details}) eq "ARRAY") {
-            return scalar @{$xmlref->{Details}};
-        } else {
-            return 1;
-        }
+    # Push a nested hash structure, retrieved via XMLSimple, onto the
+    # object's internal 'xmlref' entry, which holds a ref to an array, 
+    # whichs elements are refs to hashes holding an item's attributes
+    # (like OurPrice etc.)
+
+    #DEBUG("xmlref_add ", Data::Dumper::Dumper($xmlref));
+
+    unless(ref($self->{xmlref}) eq "HASH" &&
+           ref($self->{xmlref}->{Details}) eq "ARRAY") {
+        $self->{xmlref}->{Details} = [];
     }
+
+    if(ref($xmlref->{Details}) eq "ARRAY") {
+        # Is it an array of items?
+        push @{$self->{xmlref}->{Details}}, @{$xmlref->{Details}};
+        $nof_items_added = scalar @{$xmlref->{Details}};
+    } else {
+        # It is a single item
+        push @{$self->{xmlref}->{Details}}, $xmlref->{Details};
+        $nof_items_added = 1;
+    }
+
+    #DEBUG("xmlref_add (after):", Data::Dumper::Dumper($self));
+    return $nof_items_added;
 }
 
 1;
@@ -438,7 +453,7 @@ And here's one displaying someone's wishlist:
     use Net::Amazon::Request::Wishlist;
     
     die "usage: $0 wishlist_id\n" .
-        "(use 3W25UPFJVC46G as an example)\n" unless $ARGV[0];
+        "(use 1XL5DWOUFMFVJ as an example)\n" unless $ARGV[0];
 
     my $ua = Net::Amazon->new(
         token       => 'YOUR_AMZN_TOKEN',

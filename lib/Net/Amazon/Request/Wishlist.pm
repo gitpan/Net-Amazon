@@ -38,7 +38,7 @@ Net::Amazon::Request::Wishlist - request class for wishlist search
   );
 
   my $req = Net::Amazon::Request::Wishlist->new( 
-      id  => '3W25UPFJVC46G',
+      id  => '1XL5DWOUFMFVJ',
   );
 
     # Response is of type Net::Amazon::Response::Wishlist

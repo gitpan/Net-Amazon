@@ -1,5 +1,11 @@
 Revision history for Perl extension Net::Amazon:
 
+0.07 not yet released
+   (ms) fixed bug with single-item-wishlists
+   (ms) Lists printed as strings now have numbered bullets
+   (ms) Tests are using new wishlist 1XL5DWOUFMFVJ (Net::Amazon)
+   (ms) Added tests with canned reponses
+
 0.06 (06/07/2003)
    (ms) applied workaround for AMZN's wishlist bug: If a wishlist
      is longer than 10 items, AMZN returns the first 10 items with

@@ -28,3 +28,6 @@ lib/Net/Amazon/Response/Wishlist.pm
 t/001ASIN.t
 t/002Wishlist.t
 t/003UPC.t
+t/canned/wishlist1.xml
+t/canned/wishlist10_1.xml
+t/canned/wishlist10_2.xml

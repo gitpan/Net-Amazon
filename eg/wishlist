@@ -11,10 +11,10 @@ use Net::Amazon;
 use Net::Amazon::Request::Wishlist;
 use Log::Log4perl qw(:easy);
 
-Log::Log4perl->easy_init($INFO);
+Log::Log4perl->easy_init($DEBUG);
 
 die "usage: $0 wishlist_id\n" .
-    "(use 3W25UPFJVC46G as an example)\n" unless $ARGV[0];
+    "(use 1XL5DWOUFMFVJ as an example)\n" unless $ARGV[0];
 
 my $ua = Net::Amazon->new(
     token       => 'YOUR_AMZN_TOKEN',

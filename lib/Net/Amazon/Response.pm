@@ -14,7 +14,7 @@ sub new {
         status  => "",
         message => "",
         items   => [],
-        xmlref  => "",
+        xmlref  => {},
     };
 
     $class->SUPER::make_accessor("status");
@@ -65,11 +65,15 @@ sub list_as_string {
     my $full = "";
 
         # Column with
-    $columns = 60;
+    $columns   = 60;
+    my $bullet = 1;
 
     foreach my $property (@properties) {
         $full .= "\n" if $full;
-        $full .= wrap("", "    ", "* " . $property->as_string());
+        my $bullet_string = sprintf("[%d]%s", 
+                                    $bullet, (" " x (3-length($bullet))));
+        $full .= wrap("", "     ", $bullet_string . $property->as_string());
+        $bullet++;
     }
 
     return $full;

@@ -73,7 +73,7 @@ sub factory {
     my $xmlref = $options{xmlref};
     die "Called factory without xmlref" unless $xmlref;
 
-    DEBUG(sub {"xmlref=" . Data::Dumper::Dumper($xmlref)});
+    # DEBUG(sub {"factory xmlref=" . Data::Dumper::Dumper($xmlref)});
 
     my $catalog = $xmlref->{Catalog};
     my $obj;

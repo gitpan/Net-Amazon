@@ -30,7 +30,7 @@ sub properties {
     my($self) = @_;
 
     my $item = Net::Amazon::Property::factory(
-        xmlref => $self->{xmlref}->{Details});
+        xmlref => $self->{xmlref}->{Details}->[0]);
 
     return ($item);
 }
