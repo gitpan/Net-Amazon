@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION      = '0.03';
+our $VERSION      = '0.05';
 our $AMZN_XML_URL = "http://xml.amazon.com/onca/xml2";
 
 use LWP::Simple ();
@@ -58,7 +58,8 @@ sub request {
         $page++;
 
         my %params = $request->params();
-        $params{page} = $page;
+        $params{page}   = $page;
+        $params{locale} = $self->{locale} if exists $self->{locale};
 
         $url->query_form(
             'dev-t' => $self->{token},
@@ -114,8 +115,6 @@ sub make_accessor {
     my($package, $name) = @_;
 
     no strict qw(refs);
-
-    DEBUG("Making Accessor: $package\:\:$name");
 
     my $code = <<EOT;
         *{"$package\\::$name"} = sub {
@@ -223,7 +222,7 @@ Can return many results.
 =item Net::Amazon::Request::UPC
 
 Music search by UPC (product barcode), mandatory parameter C<upc>.
-Returns at most one result.
+C<mode> has to be set to C<music>. Returns at most one result.
 
 =back
 
@@ -311,6 +310,17 @@ C<Net::Amazon::Request::*> type and C<$response> will be of the
 corresponding C<Net::Amazon::Response::*> type.
 
 =back
+
+=head2 Accessing foreign Amazon Catalogs
+
+As of this writing (June 2003), Amazon also offers its web service for
+its UK catalog. Just pass
+
+    locale => 'uk'
+
+to C<Net::Amazon>'s constructor C<new()> and instead of returning
+results sent by the US mothership, it will query the UK catalog
+and show prices in (gack!) Pounds.
 
 =head2 EXAMPLE
 

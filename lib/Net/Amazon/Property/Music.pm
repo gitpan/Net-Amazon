@@ -12,7 +12,6 @@ sub new {
     bless $self, $class; # Bless into this class
 
     $class->SUPER::make_accessor("album");
-    $class->SUPER::make_accessor("artist");
     $class->SUPER::make_accessor("year");
     $class->SUPER::make_accessor("label");
 
@@ -24,11 +23,37 @@ sub new {
 }
 
 ##################################################
+sub artist {
+##################################################
+    my($self, $nameref) = @_;
+
+    # Only return the first artist
+    return ($self->artists($nameref))[0];
+}
+
+##################################################
+sub artists {
+##################################################
+    my($self, $nameref) = @_;
+
+    if(defined $nameref) {
+        if(ref $nameref eq "ARRAY") {
+            $self->{artists} = $nameref;
+        } else {
+            $self->{artists} = [$nameref];
+        }
+    }
+
+       # Return a list
+    return @{$self->{artists}};
+}
+
+##################################################
 sub init_via_xmlref {
 ##################################################
     my($self, $xmlref) = @_;
 
-    $self->artist($xmlref->{Artists}->{Artist});
+    $self->artists($xmlref->{Artists}->{Artist});
     $self->album($xmlref->{ProductName});
     $self->label($xmlref->{Manufacturer});
 
@@ -41,7 +66,7 @@ sub as_string {
 ##################################################
     my($self) = @_;
 
-    return $self->artist . ", " .
+    return join('/', $self->artists) . ", " .
            '"' . $self->album . '"' . ", " .
            $self->year . ", " .
            $self->OurPrice . ", " .
@@ -64,7 +89,7 @@ Net::Amazon::Property::Music - Class for pop CDs on amazon.com
 
   if($resp->is_success()) {
       for my $prop ($resp->properties) {
-          print join("/", $_->artist(), " ",
+          print join("/", $_->artists(), " ",
                 $_->album(), " ",
                 $_->label(), " ",
                 $_->year(), "\n";
@@ -81,9 +106,10 @@ popular music CD parameters.
 
 =over 4
 
-=item artist()
+=item artists()
 
-Returns the album's artist as a string.
+Returns a list of the CD's artists. There's also a C<artist()> method
+which just returns the first artist.
 
 =item label()
 

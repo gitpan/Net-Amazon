@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 18;
+use Test::More tests => 22;
 BEGIN { use_ok('Net::Amazon') };
 
 use Net::Amazon::Request::ASIN;
@@ -88,3 +88,23 @@ is($cd->artist, "Zwan", "Artist");
 is($cd->year, "2003", "Year");
 like($cd->OurPrice, qr/\$/, "Amazon Price");
 like($cd->ListPrice, qr/\$/, "List Price");
+
+######################################################################
+# Net::Amazon::Property::Music item with two artists
+######################################################################
+$req = Net::Amazon::Request::ASIN->new(
+    asin  => 'B00005A46I',
+    mode  => 'music',
+);
+
+   # Response is of type Net::Amazon::ASIN::Response
+my $resp = $ua->request($req);
+
+ok($resp->is_success(), "Successful fetch");
+like($resp->as_string(), qr(Anne Sofie von Otter/Elvis Costello), 
+     "Found Zwan");
+($cd) = $resp->properties();
+is($cd->artist(), "Anne Sofie von Otter", "artist() on mult artists");
+is(join('#', $cd->artists()), "Anne Sofie von Otter#Elvis Costello",
+    "artists() with mult artists");
+

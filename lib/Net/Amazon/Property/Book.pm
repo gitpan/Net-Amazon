@@ -12,7 +12,6 @@ sub new {
     bless $self, $class; # Bless into this class
 
     $class->make_accessor("title");
-    $class->make_accessor("authors");
     $class->make_accessor("year");
     $class->make_accessor("publisher");
 
@@ -34,6 +33,15 @@ sub init_via_xmlref {
 
     my ($year) = ($xmlref->{ReleaseDate} =~ /(\d{4})/);
     $self->year($year);
+}
+
+##################################################
+sub author {
+##################################################
+    my($self, $nameref) = @_;
+
+    # Only return the first author
+    return ($self->authors($nameref))[0];
 }
 
 ##################################################
@@ -100,7 +108,8 @@ book parameters.
 
 =item authors()
 
-Returns a list of the book's authors.
+Returns a list of the book's authors. There's also a C<author()> method
+which just returns the I<first> author.
 
 =item publisher()
 

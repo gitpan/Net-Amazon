@@ -1,5 +1,5 @@
 ######################################################################
-    Net::Amazon 0.03
+    Net::Amazon 0.05
 ######################################################################
 
 NAME
@@ -62,7 +62,7 @@ DESCRIPTION
 
     Net::Amazon::Request::UPC
         Music search by UPC (product barcode), mandatory parameter "upc".
-        Returns at most one result.
+        "mode" has to be set to "music". Returns at most one result.
 
     Check the respective man pages for details on these request objects
     (However, they haven't been written yet, so check later :). Request
@@ -129,6 +129,16 @@ DESCRIPTION
         Sends a request to the Amazon web service. $request is of a
         "Net::Amazon::Request::*" type and $response will be of the
         corresponding "Net::Amazon::Response::*" type.
+
+  Accessing foreign Amazon Catalogs
+    As of this writing (June 2003), Amazon also offers its web service for
+    its UK catalog. Just pass
+
+        locale => 'uk'
+
+    to "Net::Amazon"'s constructor "new()" and instead of returning results
+    sent by the US mothership, it will query the UK catalog and show prices
+    in (gack!) Pounds.
 
   EXAMPLE
     Here's a full-fledged example doing a artist search:

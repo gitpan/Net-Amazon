@@ -1,15 +1,21 @@
 Revision history for Perl extension Net::Amazon:
 
-TODO:
-   * analyze what looks like a bug in AMZN's web service: If a wishlist
-     is longer than 10 items, it will display the first 10 only without
-     telling how long it is (usually this is in "TotalPages").
+0.05 (05/31/2003)
+   Martha Greenberg <marthag@mit.edu> provided bug reports 
+   and patches for
+       * 'music' parameter for UPC searches (fixed in doc)
+       * Net::Amazon::Property::Music now deals correctly with
+         CDs by multiple artists.
+       * missing documentation of 'locale' parameter
 
-   * tests with lite/heavy
-   * raw xml access
-   * heavy accessors
+   (ms) Net::Amazon now takes the 'locale' parameter also in
+   the main Net::Amazon object's constructor.
 
-0.03
+0.04 (05/29/2003)
+   Dan Sully <daniel@electricrain.com> provided a patch
+   to check if a response indeed contains the {Details} hash.
+
+0.03 (05/06/2003)
    (ms) properties returns empty list on failure now
 
    Martha Greenberg <marthag@mit.edu> provided patch for 
@@ -24,3 +30,12 @@ TODO:
 
 0.01
    (ms) where it all started
+
+TODO:
+   * analyze what looks like a bug in AMZN's web service: If a wishlist
+     is longer than 10 items, it will display the first 10 only without
+     telling how long it is (usually this is in "TotalPages").
+
+   * tests with lite/heavy
+   * raw xml access
+   * heavy accessors

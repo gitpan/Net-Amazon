@@ -39,6 +39,8 @@ Net::Amazon::Request::UPC - request class for UPC search
 
   my $req = Net::Amazon::Request::UPC->new( 
       upc  => '724381198421',
+      mode => 'music',        
+
   );
 
     # Response is of type Net::Amazon::Response::UPC

@@ -82,7 +82,7 @@ sub properties {
 
     my @properties = ();
 
-    if($self->is_success) {
+    if($self->is_success && ref($self->{xmlref}->{Details}) eq 'ARRAY') {
         foreach my $xmlref (@{$self->{xmlref}->{Details}}) {
             my $property = Net::Amazon::Property::factory(xmlref => $xmlref);
             push @properties, $property;
