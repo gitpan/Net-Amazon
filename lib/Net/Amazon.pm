@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.33';
+our $VERSION          = '0.34';
 our @CANNED_RESPONSES = ();
 
 use LWP::UserAgent;
@@ -140,7 +140,7 @@ sub request {
         $url->query_form(
             'dev-t' => $self->{token},
             't'     => $self->{affiliate_id},
-            %params,
+            map { $_, $params{$_} } sort keys %params,
         );
 
         my $urlstr = $url->as_string;
@@ -688,7 +688,8 @@ C<CollectibleCount()>,
 C<NumberOfOfferings()>,
 C<UsedCount()>,
 C<ThirdPartyNewPrice()>,
-C<ThirdPartyNewCount()>.
+C<ThirdPartyNewCount()>,
+C<similar_asins()>.
 For details, check L<Net::Amazon::Property>.
 
 Also, the specialized classes C<Net::Amazon::Property::Book> and
