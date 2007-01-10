@@ -8,3 +8,4 @@ MANIFEST.bak
 adm/release
 adm/sourceforge
 adm/sfupd
+t/gen
