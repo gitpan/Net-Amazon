@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.37';
+our $VERSION          = '0.38';
 our $WSDL_DATE        = '2007-01-17';
 our $Locale           = 'us';
 our @CANNED_RESPONSES = ();
@@ -31,6 +31,7 @@ use constant SEARCH_TYPE_CLASS_MAP => {
     blended      => 'Blended',
     browsenode   => 'BrowseNode',
     exchange     => 'Exchange',
+    isbn         => 'ISBN',
     keyword      => 'Keyword',
     manufacturer => 'Manufacturer',
     musiclabel   => 'MusicLabel',
@@ -694,6 +695,12 @@ Can return many results.
 
 Music search by UPC (product barcode), mandatory parameter C<upc>.
 C<mode> has to be set to C<music>. Returns at most one result.
+
+=item C<< $ua->search(isbn => "0439784549") >>
+
+Book search by ISBN (International Standard Book Number), mandatory parameter
+C<isbn>.  Returns at most one result.  When searching non-US locales use the
+13-digit ISBN.
 
 =item C<< $ua->search(similar => "0201360683") >>
 

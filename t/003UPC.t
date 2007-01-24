@@ -37,7 +37,7 @@ my $req = Net::Amazon::Request::UPC->new(
     mode => 'music',
 );
 
-   # Response is of type Net::Amazon::UPC::Response
+   # Response is of type Net::Amazon::Response::UPC
 my $resp = $ua->request($req);
 
 ok($resp->is_success(), "Successful fetch");

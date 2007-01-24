@@ -22,6 +22,7 @@ eg/cheapo
 eg/dejazz
 eg/exchange
 eg/heavy
+eg/isbn
 eg/keyword
 eg/manufacturer
 eg/maxauthors
@@ -55,6 +56,7 @@ lib/Net/Amazon/Request/Author.pm
 lib/Net/Amazon/Request/Blended.pm
 lib/Net/Amazon/Request/BrowseNode.pm
 lib/Net/Amazon/Request/Exchange.pm
+lib/Net/Amazon/Request/ISBN.pm
 lib/Net/Amazon/Request/Keyword.pm
 lib/Net/Amazon/Request/Manufacturer.pm
 lib/Net/Amazon/Request/MusicLabel.pm
@@ -74,6 +76,7 @@ lib/Net/Amazon/Response/Author.pm
 lib/Net/Amazon/Response/Blended.pm
 lib/Net/Amazon/Response/BrowseNode.pm
 lib/Net/Amazon/Response/Exchange.pm
+lib/Net/Amazon/Response/ISBN.pm
 lib/Net/Amazon/Response/Keyword.pm
 lib/Net/Amazon/Response/Manufacturer.pm
 lib/Net/Amazon/Response/MusicLabel.pm
@@ -278,6 +281,7 @@ t/016Publisher.t
 t/017Author.t
 t/018Actor.t
 t/019MusicLabel.t
+t/020ISBN.t
 t/canned/actor.xml
 t/canned/artist.xml
 t/canned/asin_cd.xml
@@ -291,6 +295,8 @@ t/canned/blendedm.xml
 t/canned/browse.xml
 t/canned/dvd.xml
 t/canned/exchange.xml
+t/canned/isbn-de.xml
+t/canned/isbn.xml
 t/canned/keyword.xml
 t/canned/locale.xml
 t/canned/manufacturer.xml

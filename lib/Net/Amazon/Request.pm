@@ -31,6 +31,7 @@ use constant SEARCH_TYPE_OPERATION_MAP => {
     Blended      => 'ItemSearch',
     BrowseNode   => 'ItemSearch',
     Exchange     => 'SellerListingLookup',
+    ISBN         => 'ItemLookup',
     Keyword      => 'ItemSearch',
     # XXX: are there really two types?!?
     Keywords     => 'ItemSearch',

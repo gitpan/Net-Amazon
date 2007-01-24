@@ -1,5 +1,11 @@
 Revision history for Perl extension Net::Amazon:
 
+0.38 (01/24/2007)
+   (cb) Update documentation, dewey_decimal_number is for non-fiction 
+        only.
+   (cb) Add support for searching by ISBN.
+   (cb) UPC is an ItemLookup, not an ItemSearch.
+
 0.37 (01/23/2007)
    (cb) Update to WSDL 01-17-2007.
    (cb) Update index.html to indicate a differences between AWS3 and
