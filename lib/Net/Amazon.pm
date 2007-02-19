@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.38';
+our $VERSION          = '0.39';
 our $WSDL_DATE        = '2007-01-17';
 our $Locale           = 'us';
 our @CANNED_RESPONSES = ();
@@ -30,6 +30,7 @@ use constant SEARCH_TYPE_CLASS_MAP => {
     asin         => 'ASIN',
     blended      => 'Blended',
     browsenode   => 'BrowseNode',
+    ean          => 'EAN',
     exchange     => 'Exchange',
     isbn         => 'ISBN',
     keyword      => 'Keyword',
@@ -61,6 +62,14 @@ sub new {
         ua             => LWP::UserAgent->new(),
         %options,
     };
+
+    # XXX: this has to be set as soon as possible to ensure
+    # the validators pick up the correct locale.  I don't
+    # like the way this works, and need to think of a better
+    # solution.
+    if (exists $self->{locale}) {
+        $Net::Amazon::Locale = $self->{locale};
+    }
 
     help_xml_simple_choose_a_parser();
 
@@ -94,15 +103,9 @@ sub intl_url {
 ##################################################
     my($self, $url) = @_;
 
-    # Every time Amazon is adding a new country to the web service,
-    # they're rolling a dice on what the new URL is going to be.
-    # This method will try to keep up with their crazy mappings.
-
     if(! exists $self->{locale}) {
         return $url;
     }
-
-    $Net::Amazon::Locale = $self->{locale};
 
     if (0) {
     } elsif ($self->{locale} eq "ca") {

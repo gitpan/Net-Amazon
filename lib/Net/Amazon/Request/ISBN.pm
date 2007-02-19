@@ -66,11 +66,11 @@ C<Net::Amazon::Property::Book> object.
 
 Constructs a new C<Net::Amazon::Request::ISBN> object, used to query the Amazon
 web service for an item with the given ISBN number.  As of 2007-01-17 Amazon
-supports 13-digit ISBNs for non-US locales.  To construct a 13-digit ISBN from
-a 10-digit ISBN simply prepended 978 to the ISBN.  The ISBN must not contain
-hyphens.  Note: the documentation about the 2007-01-17 release explicitly
-states the exact opposite.  It states support for 13-ISBN for the US locale,
-and 13-ISBN support for non-US locales to follow soon.
+supports 13-digit ISBNs.  To construct a 13-digit ISBN from a 10-digit ISBN
+simply prepended 978 to the ISBN.  The ISBN must not contain hyphens.
+
+It appears that not all 10-digit ISBNs can be turned into 13-digit ISBNs by
+prepending 978.  Amazon lists the 13-digit ISBN alongside 10-digit ISBN.
 
 =back
 
