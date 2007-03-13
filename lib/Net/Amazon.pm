@@ -8,7 +8,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.39';
+our $VERSION          = '0.40';
 our $WSDL_DATE        = '2007-01-17';
 our $Locale           = 'us';
 our @CANNED_RESPONSES = ();
@@ -30,6 +30,7 @@ use constant SEARCH_TYPE_CLASS_MAP => {
     asin         => 'ASIN',
     blended      => 'Blended',
     browsenode   => 'BrowseNode',
+    director     => 'Director',
     ean          => 'EAN',
     exchange     => 'Exchange',
     isbn         => 'ISBN',
@@ -41,6 +42,7 @@ use constant SEARCH_TYPE_CLASS_MAP => {
     seller       => 'Seller',
     similar      => 'Similar',
     textstream   => 'TextStream',
+    title        => 'Title',
     upc          => 'UPC',
     wishlist     => 'Wishlist',
 };
