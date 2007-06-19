@@ -17,17 +17,22 @@ use Data::Dumper;
 use Log::Log4perl qw(:easy);
 
 # read: a poor man's XPath
+# NOTE: Igor Sutton Lopes has a module called Hash::Path that does exactly
+# what I am doing here.  He beat me to the punch. :)
 our %DEFAULT_ATTRIBUTES_XPATH = (
     Availability => [qw(Offers Offer OfferListing Availability)],
     Catalog => [qw(ItemAttributes ProductGroup)],
     Binding => [qw(ItemAttributes Binding)],
     CollectibleCount => [qw(OfferSummary TotalCollectible)],
     CollectiblePrice => [qw(OfferSummary LowestCollectiblePrice FormattedPrice)],
+    ImageUrlLarge => [qw(LargeImage URL)],
     LargeImageUrl => [qw(LargeImage URL)],
     ListPrice => [qw(ItemAttributes ListPrice FormattedPrice)],
     Manufacturer => [qw(ItemAttributes Manufacturer)],
     MediumImageUrl => [qw(MediumImage URL)],
+    ImageUrlMedium => [qw(MediumImage URL)],
     OurPrice => [qw(Offers Offer OfferListing Price FormattedPrice)],
+    ImageUrlSmall => [qw(SmallImage URL)],
     SmallImageUrl => [qw(SmallImage URL)],
     SuperSaverShipping => [qw(Offers Offer OfferListing IsEligibleForSuperSaverShipping)],
     Title => [qw(Title)],
