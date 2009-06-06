@@ -1,5 +1,5 @@
 #!/usr/bin/perl 
-#$Revision: 1.4 $$Date: 2007/11/11 20:26:22 $$Author: boumenot $
+#$Revision: 1.4 $$Date: 2007-11-11 20:26:22 $$Author: boumenot $
 #######################################################################
 #######################################################################
 
@@ -110,13 +110,13 @@ for my $locale (keys %{(AWS4_LOCALE_HTML)}) {
 ## subs #########################################
 
 sub usage {
-    print '$Revision: 1.4 $$Date: 2007/11/11 20:26:22 $$Author: boumenot $ ', "\n";
+    print '$Revision: 1.4 $$Date: 2007-11-11 20:26:22 $$Author: boumenot $ ', "\n";
     pod2usage(-verbose=>2, -exitval => 2);
     exit (1);
 }
 
 sub version {
-    print '$Revision: 1.4 $$Date: 2007/11/11 20:26:22 $$Author: boumenot $ ', "\n";
+    print '$Revision: 1.4 $$Date: 2007-11-11 20:26:22 $$Author: boumenot $ ', "\n";
     exit (1);
 }
 
