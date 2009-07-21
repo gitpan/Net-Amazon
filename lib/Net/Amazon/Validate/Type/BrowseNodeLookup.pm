@@ -9,6 +9,8 @@ use warnings;
 
 use constant RESPONSEGROUP_VALID_VALUES => {
     'BrowseNodeInfo' => 1,
+    'MostGifted ' => 1,
+    'MostWishedFor ' => 1,
     'NewReleases' => 1,
     'TopSellers' => 1,
 };

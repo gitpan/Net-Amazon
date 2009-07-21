@@ -8,8 +8,8 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION          = '0.54';
-our $WSDL_DATE        = '2009-03-31';
+our $VERSION          = '0.55';
+our $WSDL_DATE        = '2009-07-01';
 our $Locale           = 'us';
 our @CANNED_RESPONSES = ();
 our $IS_CANNED        = 0;
@@ -29,6 +29,7 @@ use URI::Escape qw(uri_escape);
 use constant SEARCH_TYPE_CLASS_MAP => {
     actor        => 'Actor',
     artist       => 'Artist',
+    all          => 'All',
     author       => 'Author',
     asin         => 'ASIN',
     blended      => 'Blended',
@@ -167,7 +168,7 @@ sub request {
         # Get a cachable URL before signing the request.
         my $url_cachablestr = $url->as_string;
 
-        # New signature for 2009-03-31. Do not alter URL after this!
+        # New signature for >=2009-03-31. Do not alter URL after this!
         $url = $self->_sign_request($url) if exists $self->{secret_key};
 
         DEBUG(sub { "request: params = " . Dumper(\%params) . "\n"});
@@ -898,6 +899,11 @@ Music search by Actor, mandatory parameter "actor". Can return many results.
 Music search by Artist, mandatory parameter C<artist>.
 Can return many results.
 
+=item Net::Amazon::Request::All
+
+'All' search on a keyword, mandatory parameter C<all>.
+Can return many results.
+
 =item Net::Amazon::Request::Author
 
 Music search by Author, mandatory parameter "author". Can return many results.
@@ -1128,7 +1134,7 @@ And here's one displaying someone's wishlist:
 
 DETAILS
         Net::Amazon is based on Amazon Web Services version 4, and uses
-        WSDL version 2009-03-31.
+        WSDL version 2009-07-01.
 
 =head1 CACHING
 

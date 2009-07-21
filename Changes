@@ -1,4 +1,10 @@
 Revision history for Perl extension Net::Amazon:
+0.55 (07/20/2009)
+   (cb) Yuichi Tateno implemented support for the SearchIndex all.
+   (cb) Vince Veselosky fixed adm/aws4-types script, and as a result
+        updated classes in Validate/Type.
+   (cb) Update to WSDL 2009-07-16.
+
 0.54 (06/17/2009)
    (cb) Alfons Wittmann reported that signing requests broke caching due
         to the current time being incorporated into every signed URL 
