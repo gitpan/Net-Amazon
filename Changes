@@ -1,4 +1,12 @@
 Revision history for Perl extension Net::Amazon:
+0.56 (09/07/2009)
+   (cb) Add support for searching MP3 downloads as requsted by Dave 
+        Hodgkinson.
+   (cb) Required for MP3 Downloads, and inspired by Vince Veselosky's 
+        fix, update aws4-itemsearch.
+   (cb) secret_key is now a required parameter.  Update all of the example
+        scripts with the secret_key parameter.
+
 0.55 (07/20/2009)
    (cb) Yuichi Tateno implemented support for the SearchIndex all.
    (cb) Vince Veselosky fixed adm/aws4-types script, and as a result
