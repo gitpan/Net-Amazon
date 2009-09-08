@@ -1,4 +1,8 @@
 Revision history for Perl extension Net::Amazon:
+0.57 (09/08/2009)
+   (cb) David Raab reported an incomplete kit via rt.cpan.org.  Re-run
+        make manifest to address my mistake.
+
 0.56 (09/07/2009)
    (cb) Add support for searching MP3 downloads as requsted by Dave 
         Hodgkinson.
