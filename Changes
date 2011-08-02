@@ -1,4 +1,11 @@
 Revision history for Perl extension Net::Amazon:
+0.60 (08/01/2011)
+   (cb) Fix the page and max_pages parameter to correctly fetch the specified
+        number of pages, and start at the correct offset.  Reported as rt 69201.
+   (cb) Add a method to get similar products.  Patch submitted by Jennifer.
+   (cb) Push from cpanservice: Small dist maintenance. Please use latest 
+        ExtUtils::MakeMaker for release.
+
 0.59 (11/02/2009)
    (cb) DigitalMusicTrack.pm was not included, reported by Matt 
         Okeson-Harlow.

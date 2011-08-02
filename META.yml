@@ -1,8 +1,8 @@
 --- #YAML:1.0
 name:                Net-Amazon
-version:             0.59
+version:             0.60
 abstract:            Framework for accessing amazon.com via REST
-license:             ~
+license:             perl
 author:              
     - Mike <m@perlmeister.com>
 generated_by:        ExtUtils::MakeMaker version 6.42
