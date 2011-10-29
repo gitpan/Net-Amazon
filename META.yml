@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Net-Amazon
-version:             0.60
+version:             0.61
 abstract:            Framework for accessing amazon.com via REST
 license:             perl
 author:              
