@@ -1,7 +1,7 @@
 # -*- perl -*-
 # !!! DO NOT EDIT !!!
 # This file was automatically generated.
-package Net::Amazon::Validate::ItemSearch::jp::Baby;
+package Net::Amazon::Validate::ItemSearch::es::DVD;
 
 use 5.006;
 use strict;
@@ -14,14 +14,16 @@ sub new {
         %options,
     };
 
-    push @{$self->{_options}}, 'Brand';
+    push @{$self->{_options}}, 'Actor';
+    push @{$self->{_options}}, 'AudienceRating';
+    push @{$self->{_options}}, 'Availability';
     push @{$self->{_options}}, 'BrowseNode';
-    push @{$self->{_options}}, 'Condition';
-    push @{$self->{_options}}, 'ItemPage';
+    push @{$self->{_options}}, 'Director';
     push @{$self->{_options}}, 'Keywords';
-    push @{$self->{_options}}, 'Manufacturer';
     push @{$self->{_options}}, 'MaximumPrice';
+    push @{$self->{_options}}, 'MerchantId';
     push @{$self->{_options}}, 'MinimumPrice';
+    push @{$self->{_options}}, 'Publisher';
     push @{$self->{_options}}, 'Sort';
     push @{$self->{_options}}, 'Title';
 
@@ -46,7 +48,7 @@ sub find_match {
     for (@{$self->{_options}}) {
         return $_ if lc($_) eq lc($value);
     }
-    die "$value is not a valid value for jp::Baby!\n";
+    die "$value is not a valid value for es::DVD!\n";
 }
 
 1;
@@ -55,8 +57,8 @@ __END__
 
 =head1 NAME
 
-Net::Amazon::Validate::ItemSearch::jp::Baby - valid search indicies
-for the jp locale and the Baby SearchIndex.
+Net::Amazon::Validate::ItemSearch::es::DVD - valid search indicies
+for the es locale and the DVD SearchIndex.
 
 =head1 DESCRIPTION
 
@@ -64,14 +66,16 @@ The default value is Title, unless mode is specified.
 
 The list of available values are:
 
-    Brand
+    Actor
+    AudienceRating
+    Availability
     BrowseNode
-    Condition
-    ItemPage
+    Director
     Keywords
-    Manufacturer
     MaximumPrice
+    MerchantId
     MinimumPrice
+    Publisher
     Sort
     Title
 

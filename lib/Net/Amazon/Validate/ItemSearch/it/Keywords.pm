@@ -1,7 +1,7 @@
 # -*- perl -*-
 # !!! DO NOT EDIT !!!
 # This file was automatically generated.
-package Net::Amazon::Validate::ItemSearch::jp::Keywords;
+package Net::Amazon::Validate::ItemSearch::it::Keywords;
 
 use 5.006;
 use strict;
@@ -14,35 +14,19 @@ sub new {
         %options,
     };
 
-    push @{$self->{_options}}, 'Apparel';
-    push @{$self->{_options}}, 'Appliances';
-    push @{$self->{_options}}, 'Automotive';
+    push @{$self->{_options}}, '';
     push @{$self->{_options}}, 'Baby';
-    push @{$self->{_options}}, 'Beauty';
-    push @{$self->{_options}}, 'Blended';
     push @{$self->{_options}}, 'Books';
-    push @{$self->{_options}}, 'Classical';
     push @{$self->{_options}}, 'DVD';
     push @{$self->{_options}}, 'Electronics';
     push @{$self->{_options}}, 'ForeignBooks';
-    push @{$self->{_options}}, 'Grocery';
-    push @{$self->{_options}}, 'HealthPersonalCare';
-    push @{$self->{_options}}, 'Hobbies';
-    push @{$self->{_options}}, 'HomeImprovement';
-    push @{$self->{_options}}, 'Jewelry';
+    push @{$self->{_options}}, 'KindleStore';
     push @{$self->{_options}}, 'Kitchen';
-    push @{$self->{_options}}, 'MP3Downloads';
-    push @{$self->{_options}}, 'Marketplace';
+    push @{$self->{_options}}, 'Lighting';
     push @{$self->{_options}}, 'Music';
-    push @{$self->{_options}}, 'MusicTracks';
-    push @{$self->{_options}}, 'MusicalInstruments';
-    push @{$self->{_options}}, 'OfficeProducts';
     push @{$self->{_options}}, 'Shoes';
     push @{$self->{_options}}, 'Software';
-    push @{$self->{_options}}, 'SportingGoods';
     push @{$self->{_options}}, 'Toys';
-    push @{$self->{_options}}, 'VHS';
-    push @{$self->{_options}}, 'Video';
     push @{$self->{_options}}, 'VideoGames';
     push @{$self->{_options}}, 'Watches';
 
@@ -67,7 +51,7 @@ sub find_match {
     for (@{$self->{_options}}) {
         return $_ if lc($_) eq lc($value);
     }
-    die "$value is not a valid value for jp::Keywords!\n";
+    die "$value is not a valid value for it::Keywords!\n";
 }
 
 1;
@@ -76,8 +60,8 @@ __END__
 
 =head1 NAME
 
-Net::Amazon::Validate::ItemSearch::jp::Keywords - valid search indicies
-for the jp locale and the Keywords SearchIndex.
+Net::Amazon::Validate::ItemSearch::it::Keywords - valid search indicies
+for the it locale and the Keywords SearchIndex.
 
 =head1 DESCRIPTION
 
@@ -85,35 +69,19 @@ The default value is Books, unless mode is specified.
 
 The list of available values are:
 
-    Apparel
-    Appliances
-    Automotive
+    
     Baby
-    Beauty
-    Blended
     Books
-    Classical
     DVD
     Electronics
     ForeignBooks
-    Grocery
-    HealthPersonalCare
-    Hobbies
-    HomeImprovement
-    Jewelry
+    KindleStore
     Kitchen
-    MP3Downloads
-    Marketplace
+    Lighting
     Music
-    MusicTracks
-    MusicalInstruments
-    OfficeProducts
     Shoes
     Software
-    SportingGoods
     Toys
-    VHS
-    Video
     VideoGames
     Watches
 

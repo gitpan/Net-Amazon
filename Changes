@@ -1,4 +1,10 @@
 Revision history for Perl extension Net::Amazon:
+0.62 (01/26/2013)
+   (dc) Add support for HTTP compression where available, enabled by default.
+   (cb) Add support for EAN to the US locale, as reported by Jacob Turino.
+   (cb) Add Spain and Italy locales, as implemented by Menno Blom.
+   (cb) Add some new departments in Amazon.co.jp, as implemented Naoya Ito.
+
 0.61 (10/28/2011)
    (cb) rt 71937; Amazon now requires an Associate Tag, so enforce usage.
    (cb) The ListLookup operation has been removed from the WSDL (from 2010!),
